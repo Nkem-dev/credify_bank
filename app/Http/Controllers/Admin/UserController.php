@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Transfer;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -68,5 +73,115 @@ class UserController extends Controller
             'admins'
         ));
     }
+
+
+      public function show(User $user)
+    {
+        // Load relationships
+        $user->load([
+            'transfers' => function($query) {
+                $query->orderBy('created_at', 'desc')->limit(10); //last 10 transfers
+            },
+            'savingsPlans', //load savings plans and loans
+            'loans'
+            // 'walletFundings'
+             => function($query) {
+                $query->orderBy('created_at', 'desc')->limit(5);
+            },
+            // 'securityAlerts' => function($query) {
+            //     $query->orderBy('created_at', 'desc')->limit(10);
+            // },
+        ]);
+
+        // Get login history from sessions
+        $loginHistory = DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->orderBy('last_activity', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Transaction statistics
+        $totalTransactions = $user->transfers()->where('status', 'successful')->sum('amount'); //total successful outgoing transfers
+        // $totalDeposits = $user->walletFundings()->where('status', 'successful')->sum('amount');
+        $totalSavings = $user->savingsPlans()->sum('current_balance'); //total savings balance
+        $totalLoans = $user->loans()->where('status', 'approved')->sum('amount'); //total loans
+
+        // return view with details
+        return view('admin.users.show', compact(
+            'user',
+            'loginHistory',
+            'totalTransactions',
+            // 'totalDeposits',
+            'totalSavings',
+            'totalLoans'
+        ));
+    }
+
+    public function showBalanceForm(User $user)
+    {
+         return view('admin.users.credit', compact('user'));
+    }
+
+
+   public function credit(Request $request, User $user)
+{
+    $admin = auth()->user();
+
+    $validated = $request->validate([
+        'amount'       => 'required|numeric|min:100|max:50000000',
+        'description'  => 'required|string|max:255',
+        'transaction_pin' => 'required|digits:4',
+    ]);
+
+    // Verify Admin Transaction PIN
+    if (!Hash::check($validated['transaction_pin'], $admin->transaction_pin)) {
+        return back()->with('error', 'Incorrect transaction PIN.');
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $amount = $validated['amount'];
+
+        // Credit user balance
+        $user->increment('balance', $amount);
+
+        // Create transfer record
+        $reference = 'CR-' . strtoupper(substr(uniqid(), -8));
+
+        Transfer::create([
+            'user_id'     => $user->id,
+            'type'        => 'deposit',
+            'amount'      => $amount,
+            'fee'         => 0,
+            'status'      => 'successful',
+            'description' => 'Admin Credit: ' . $validated['description'],
+            'reference'   => $reference,
+            'metadata'    => json_encode([
+                'credited_by' => $admin->name . ' (Admin)',
+                'ip_address'  => $request->ip(),
+            ]),
+        ]);
+
+        DB::commit();
+
+        Log::channel('admin_actions')->info('Admin credited user', [
+            'admin_id' => $admin->id,
+            'user_id'  => $user->id,
+            'amount'   => $amount,
+            'ref'      => $reference,
+        ]);
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', '₦' . number_format($amount, 2) . ' credited successfully!');
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        Log::error('Admin credit failed: ' . $e->getMessage());
+
+        return back()->with('error', 'Failed to credit account. Please try again.');
+    }
+}
+   
 
 }

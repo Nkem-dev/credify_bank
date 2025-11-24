@@ -13,8 +13,6 @@
         </a>
     </div>
 
-   
-
     @if($plans->count() == 0)
         <div class="text-center py-12">
             <i class="ti ti-pig-money text-6xl text-gray-300 mb-4"></i>
@@ -38,6 +36,13 @@
                                     Target: ₦{{ number_format($plan->target_amount) }}
                                 </span>
                             @endif
+                            
+                            <!-- View History Button -->
+                            <a href="{{ route('user.savings.transactions', $plan) }}"
+                               class="text-primary hover:text-primary/80 p-1"
+                               title="View transaction history">
+                                <i class="ti ti-history text-lg"></i>
+                            </a>
                             
                             <!-- Delete Button -->
                             <form method="POST" action="{{ route('user.savings.destroy', $plan) }}" 
@@ -109,13 +114,24 @@
                         </div>
                     </form>
 
-                    <div class="mt-4 pt-4 border-t dark:border-gray-700 flex justify-between items-center">
-                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                            <i class="ti ti-clock"></i>
-                            Last interest: {{ $plan->last_interest_applied_at?->diffForHumans() ?? 'Never' }}
+                    <div class="mt-4 pt-4 border-t dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                <i class="ti ti-clock"></i>
+                                Last interest: {{ $plan->last_interest_applied_at?->diffForHumans() ?? 'Never' }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                Created: {{ $plan->created_at->format('M d, Y') }}
+                            </div>
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                            Created: {{ $plan->created_at->format('M d, Y') }}
+                        
+                        <!-- Transaction Count Badge -->
+                        <div class="flex justify-between items-center">
+                            <a href="{{ route('user.savings.transactions', $plan) }}"
+                               class="text-xs text-primary hover:text-primary/80 font-medium inline-flex items-center">
+                                <i class="ti ti-receipt mr-1"></i>
+                                View {{ $plan->transactions->count() }} {{ Str::plural('transaction', $plan->transactions->count()) }}
+                            </a>
                         </div>
                     </div>
                 </div>

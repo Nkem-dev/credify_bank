@@ -6,7 +6,7 @@
     <div class="mb-6 md:mb-8 mt-20">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           Welcome, 
-            <span class="text-primary">{{ Auth::user()->name }}</span>
+            <span class="text-[#5E84ff]">{{ Auth::user()->name }}</span>
         </h1>
         <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm md:text-base">
             Monitor and manage Credify Bank operations
@@ -94,14 +94,14 @@
         </div>
 
         <!-- Withdrawals -->
-        <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-4 md:p-6 rounded-xl shadow-sm border border-red-200 dark:border-red-800">
+        <div class="bg-[#F6F5DC] p-4 md:p-6 rounded-xl shadow-sm border border-[#6A6A1A] dark:border-[#6A6A1A]">
             <div class="flex items-center justify-between mb-4">
-                <i class="ti ti-arrow-up-right text-2xl md:text-3xl text-red-600 dark:text-red-400"></i>
-                <span class="text-xs font-medium text-red-700 dark:text-red-400">{{ number_format($withdrawalsCount) }} transactions</span>
+                <i class="ti ti-arrow-up-right text-2xl md:text-3xl text-[#6A6A1A] dark:text-[#6A6A1A]"></i>
+                <span class="text-xs font-medium text-[#6A6A1A] dark:text-[#6A6A1A]">{{ number_format($withdrawalsCount) }} transactions</span>
             </div>
-            <h3 class="text-xs md:text-sm text-red-700 dark:text-red-400 mb-1">Total Withdrawals</h3>
-            <p class="text-xl md:text-2xl font-bold text-red-800 dark:text-red-300">₦{{ number_format($totalWithdrawals, 2) }}</p>
-            <p class="text-xs text-red-600 dark:text-red-500 mt-2">Today: ₦{{ number_format($withdrawalsToday, 2) }}</p>
+            <h3 class="text-xs md:text-sm text-[#6A6A1A] dark:text-[#6A6A1A] mb-1">Total Withdrawals</h3>
+            <p class="text-xl md:text-2xl font-bold text-[#6A6A1A] dark:text-[#6A6A1A]">₦{{ number_format($totalWithdrawals, 2) }}</p>
+            <p class="text-xs text-[#6A6A1A] dark:text-[#6A6A1A] mt-2">Today: ₦{{ number_format($withdrawalsToday, 2) }}</p>
         </div>
 
         <!-- Savings & Loans -->

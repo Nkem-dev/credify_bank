@@ -23,15 +23,26 @@
             <span>Dashboard</span>
         </a>
 
-        <!-- My Accounts -->
-        <a href="" 
+       
+        <!-- My Account -->
+        <a href="{{ route('user.account.index') }}" 
            class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                   hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
-                  {{ request()->routeIs('user.accounts*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
-            <i class="ti ti-credit-card text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
-                   {{ request()->routeIs('user.accounts*') ? 'text-white' : '' }}"></i>
-            <span>My Accounts</span>
+                  {{ request()->routeIs('user.account*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+            <i class="ti ti-user-circle text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+                   {{ request()->routeIs('user.account*') ? 'text-white' : '' }}"></i>
+            <span>My Account</span>
         </a>
+
+        <!-- Investments -->
+<a href="" 
+   class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+          hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
+          {{ request()->routeIs('user.invest*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+    <i class="ti ti-chart-line text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+           {{ request()->routeIs('user.account*') ? 'text-white' : '' }}"></i>
+    <span>Investments</span>
+</a>
 
         <!-- Transactions -->
         <a href="{{ route('user.transactions.index') }}" 

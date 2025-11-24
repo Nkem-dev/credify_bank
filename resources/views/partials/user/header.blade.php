@@ -60,7 +60,7 @@
                         <i class="ti ti-settings"></i>
                         <span>Settings</span>
                     </a>
-                    <a href="#" class="flex items-center space-x-2 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <a href="{{ route('user.account.index') }}" class="flex items-center space-x-2 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
                         <i class="ti ti-credit-card"></i>
                         <span>Account</span>
                     </a>

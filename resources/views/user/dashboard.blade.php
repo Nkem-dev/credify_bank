@@ -146,7 +146,7 @@
     <div class="mb-8">
         <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h3>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <a href="#" class="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg text-center hover:bg-blue-200 dark:hover:bg-blue-800/50 transition group">
+            <a href="{{ route('user.deposit.create') }}" class="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg text-center hover:bg-blue-200 dark:hover:bg-blue-800/50 transition group">
                 <i class="ti ti-arrow-up-right text-2xl text-primary mb-2 block group-hover:scale-110 transition"></i>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Fund Wallet</p>
             </a>

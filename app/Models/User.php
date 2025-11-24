@@ -33,6 +33,7 @@ class User extends Authenticatable
         'email_verification_token',
         'transaction_pin',         // hashed 4-digit PIN
         'pin_set_at',
+        'last_login_at',
         
     ];
 
@@ -147,11 +148,7 @@ public function getRegistrationPhoneAttribute()
     }
     
 
-    // savings balance accessor
-// public function getSavingsBalanceAttribute() 
-// { 
-//     return $this->attributes['savings_balance'] ?? 0.00; 
-// }
+  
 
 public function getInvestmentValueAttribute() 
 {

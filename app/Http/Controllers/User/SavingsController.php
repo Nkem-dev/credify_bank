@@ -198,4 +198,32 @@ public function store(Request $request)
             return back()->with('error', 'Failed to delete plan: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show transaction history for a specific savings plan
+     */
+    public function transactions(SavingsPlan $plan)
+    {
+        $user = auth()->user();
+
+        // Ensure user owns this plan
+        if ($plan->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Get transactions with pagination
+        $transactions = $plan->transactions()
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Calculate statistics
+        $stats = [
+            'total_deposits' => $plan->transactions()->where('type', 'deposit')->sum('amount'),
+            'total_withdrawals' => $plan->transactions()->where('type', 'withdrawal')->sum('amount'),
+            'total_interest' => $plan->transactions()->where('type', 'interest')->sum('amount'),
+            'transaction_count' => $plan->transactions()->count(),
+        ];
+
+        return view('user.savings.transactions', compact('plan', 'transactions', 'stats'));
+    }
 }

@@ -24,10 +24,10 @@
 
         <!-- Users -->
         <a href="{{ route('admin.users.index') }}" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-               hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
-               {{ request()->is('admin/customers*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
-            <i class="ti ti-users text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
-                   {{ request()->is('admin/customers*') ? 'text-white' : '' }}"></i>
+               hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-[#5E84ff] dark:hover:text-[#5E84ff]
+               {{ request()->is('admin/users*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+            <i class="ti ti-users text-lg transition-colors group-hover:text-[#5E84ff] dark:group-hover:text-[#5E84ff]
+                   {{ request()->is('admin/users*') ? 'text-white' : '' }}"></i>
             <span>Users</span>
         </a>
 
@@ -41,7 +41,7 @@
         </a>
 
         <!-- Transactions -->
-        <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+        <a href="{{ route('admin.transactions.index') }}" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
                {{ request()->is('admin/transactions*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
             <i class="ti ti-transfer-in text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
@@ -58,14 +58,15 @@
             <span>Reports</span>
         </a>
 
-        <!-- Security -->
-        <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-               hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
-               {{ request()->is('admin/security*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
-            <i class="ti ti-shield-check text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
-                   {{ request()->is('admin/security*') ? 'text-white' : '' }}"></i>
-            <span>Security</span>
-        </a>
+       <!-- Loans -->
+<a href="{{ route('admin.loans.index') }}" 
+   class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+          hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
+          {{ request()->routeIs('admin.loans*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+    <i class="ti ti-cash text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+           {{ request()->routeIs('admin.loans*') ? 'text-white' : '' }}"></i>
+    <span>Loans</span>
+</a>
 
         <!-- Settings -->
         <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200

@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Paystack\PaymentStatusController;
+use App\Http\Controllers\Paystack\PaystackCallbackController;
+use App\Http\Controllers\User\AccountController;
+use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\LoanController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\SavingsController;
@@ -19,6 +23,23 @@ Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashbo
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/upgrade', [ProfileController::class, 'upgrade'])->name('profile.upgrade');
+
+      // Deposit routes
+    Route::get('/deposit/create', [DepositController::class, 'create'])->name('deposit.create'); //show the deposit form
+    
+    Route::post('/deposit/initialize', [DepositController::class, 'initialize'])->name('deposit.initialize');//submit form to initialize payment
+    
+    // Paystack callback
+    Route::get('/payment/callback/paystack', [PaystackCallbackController::class, 'callback'])->name('payment.callback.paystack');
+    
+    // Payment status
+    Route::get('/payment/success/{transaction}', [PaymentStatusController::class, 'success'])->name('payment.success');
+
+      // Account routes
+    Route::get('/account', [AccountController::class, 'index'])->name('account.index');
+    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.update.profile');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.update.password');
+    Route::put('/account/security', [AccountController::class, 'updateSecurity'])->name('account.update.security');
 
 // route for transfer
     Route::prefix('transfers')->name('transfers.')->group(function () {
@@ -65,6 +86,8 @@ Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashbo
     ->name('data.receipt');
 
 
+
+  
     });
 
     // route for virtual card
@@ -94,6 +117,7 @@ Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashbo
         Route::post('/', [SavingsController::class, 'store'])->name('store');
         Route::post('/{plan}/fund', [SavingsController::class, 'fund'])->name('fund');
         Route::post('/{plan}/withdraw', [SavingsController::class, 'withdraw'])->name('withdraw'); 
+        Route::get('/savings/{plan}/transactions', [SavingsController::class, 'transactions'])->name('transactions');
         Route::delete('/{plan}', [SavingsController::class, 'destroy'])->name('destroy'); 
      });
 

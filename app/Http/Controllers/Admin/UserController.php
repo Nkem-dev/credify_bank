@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -74,7 +75,7 @@ class UserController extends Controller
         ));
     }
 
-
+// show user information
       public function show(User $user)
     {
         // Load relationships
@@ -116,72 +117,186 @@ class UserController extends Controller
             'totalLoans'
         ));
     }
-
-    public function showBalanceForm(User $user)
-    {
-         return view('admin.users.credit', compact('user'));
-    }
-
-
-   public function credit(Request $request, User $user)
+    // credit user account
+public function credit(Request $request, User $user)
 {
-    $admin = auth()->user();
-
-    $validated = $request->validate([
-        'amount'       => 'required|numeric|min:100|max:50000000',
-        'description'  => 'required|string|max:255',
-        'transaction_pin' => 'required|digits:4',
+    // validate inputs
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01',
+        'description' => 'nullable|string|max:255',
     ]);
 
-    // Verify Admin Transaction PIN
-    if (!Hash::check($validated['transaction_pin'], $admin->transaction_pin)) {
-        return back()->with('error', 'Incorrect transaction PIN.');
-    }
-
-    DB::beginTransaction();
+    $amount = $request->amount; //amount to credit user
+    $description = $request->description ?? 'Manual credit by admin'; //description
 
     try {
-        $amount = $validated['amount'];
+        DB::beginTransaction(); //begin task
 
-        // Credit user balance
-        $user->increment('balance', $amount);
+        // Update user balance
+        $user->balance += $amount; //credit user's account
+        $user->save(); //save to database
 
-        // Create transfer record
-        $reference = 'CR-' . strtoupper(substr(uniqid(), -8));
-
+        // Record transaction
         Transfer::create([
-            'user_id'     => $user->id,
-            'type'        => 'deposit',
-            'amount'      => $amount,
-            'fee'         => 0,
-            'status'      => 'successful',
-            'description' => 'Admin Credit: ' . $validated['description'],
-            'reference'   => $reference,
-            'metadata'    => json_encode([
-                'credited_by' => $admin->name . ' (Admin)',
-                'ip_address'  => $request->ip(),
-            ]),
+            'user_id' => $user->id,
+            'recipient_name' => $user->name,
+            'recipient_account_number' => $user->account_number,
+            'type' => 'deposit',
+            'amount' => $amount,
+            'total_amount' => $amount, 
+            'status' => 'successful',
+            'description' => $description,
+            'reference' => 'CRED-' . strtoupper(Str::random(10)),
         ]);
 
-        DB::commit();
+        DB::commit(); //commit to database
 
-        Log::channel('admin_actions')->info('Admin credited user', [
-            'admin_id' => $admin->id,
-            'user_id'  => $user->id,
-            'amount'   => $amount,
-            'ref'      => $reference,
-        ]);
-
-        return redirect()->route('admin.users.show', $user)
-            ->with('success', '₦' . number_format($amount, 2) . ' credited successfully!');
+        // return woith success message
+        return redirect()->back()->with('success', "Successfully credited ₦" . number_format($amount, 2) . " to {$user->name}'s account.");
 
     } catch (Exception $e) {
         DB::rollBack();
-        Log::error('Admin credit failed: ' . $e->getMessage());
-
-        return back()->with('error', 'Failed to credit account. Please try again.');
+        return redirect()->back()->with('error', 'Failed to credit account: ' . $e->getMessage());
     }
 }
-   
 
+// debit user's account
+public function debit(Request $request, User $user)
+{
+    // validate inputs
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01',
+        'description' => 'nullable|string|max:255',
+    ]);
+
+    $amount = $request->amount; //get the amount requested to debit
+    $description = $request->description ?? 'Manual debit by admin'; //description
+
+    // Check if user has sufficient balance
+    if ($user->balance < $amount) {
+        return redirect()->back()->with('error', 'Insufficient balance. User only has ₦' . number_format($user->balance, 2));
+    }
+
+    try {
+        // start task
+        DB::beginTransaction();
+
+        // Update balance
+        $user->balance -= $amount; //debit user account
+        $user->save();
+
+        // Record transaction
+        Transfer::create([
+            'user_id' => $user->id,
+            'recipient_name' => $user->name,
+            'recipient_account_number' => $user->account_number,
+            'type' => 'withdrawal',
+            'amount' => $amount,
+            'total_amount' => $amount,
+            'status' => 'successful',
+            'description' => $description,
+            'reference' => 'DEB-' . strtoupper(Str::random(10)),
+        ]);
+
+        DB::commit(); //commit to database
+
+        // return with success message 
+        return redirect()->back()->with('success', "Successfully debited ₦" . number_format($amount, 2) . " from {$user->name}'s account.");
+
+    } catch (Exception $e) { //if it fails
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to debit account: ' . $e->getMessage());
+    }
+}
+
+// deactivate user
+public function deactivate(Request $request, User $user)
+{
+    // validate inputs
+    $request->validate([
+        'reason' => 'nullable|string|max:500',
+    ]);
+
+    // Check if user is already deactivated
+    if ($user->status === 'inactive') {
+        return redirect()->back()->with('error', 'User is already deactivated.');
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // Update user status
+        $user->status = 'inactive';
+        $user->save(); //save user status
+
+       
+        DB::commit(); //commit to database
+
+        // return with success message
+        return redirect()->back()->with('success', "Successfully deactivated {$user->name}'s account.");
+
+    } catch (Exception $e) { //if it fails
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to deactivate account: ' . $e->getMessage());
+    }
+}
+
+// suspend user
+public function suspend(Request $request, User $user)
+{
+    // validate input
+    $request->validate([
+        'reason' => 'nullable|string|max:500',
+    ]);
+
+    // Check if user is already suspended
+    if ($user->status === 'suspended') {
+        return redirect()->back()->with('error', 'User is already suspended.');
+    }
+
+    try {
+        // begin task
+        DB::beginTransaction();
+
+        // Update user status
+        $user->status = 'suspended';
+        $user->save(); //save to database
+
+        DB::commit(); //commit to database
+
+        // return with success message
+        return redirect()->back()->with('success', "Successfully suspended {$user->name}'s account.");
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to suspend account: ' . $e->getMessage());
+    }
+}
+
+// activate user's account
+public function activate(Request $request, User $user)
+{
+    // Check if user is already active
+    if ($user->status === 'active') {
+        return redirect()->back()->with('error', 'User is already active.');
+    }
+
+    try {
+        DB::beginTransaction(); //begin task
+
+        // Update user status
+        $user->status = 'active';
+        $user->save(); //save to database
+
+       
+        DB::commit(); //commit to database
+
+        // return witn success message
+        return redirect()->back()->with('success', "Successfully activated {$user->name}'s account.");
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to activate account: ' . $e->getMessage());
+    }
+}
 }

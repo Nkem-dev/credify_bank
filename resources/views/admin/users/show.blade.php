@@ -1,605 +1,714 @@
+{{-- resources/views/admin/users/show.blade.php --}}
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid px-4 py-6">
-    <!-- Header -->
-    <div class="mb-6 mt-20">
-        <a href="{{ route('admin.users.index') }}" class="text-[#5E84ff] hover:text-primary/80 mb-2 inline-flex items-center gap-2 text-sm font-medium">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to Users
-        </a>
-        <div class="flex items-center justify-between mt-2">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ $user->name }}</h1>
-                <p class="text-muted-foreground mt-1">{{ $user->email }}</p>
+<main class="flex-1 pt-16 p-6">
+    <div class="max-w-7xl mx-auto mt-10">
+
+        <!-- Header + Back Button -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('admin.users.index') }}"
+                   class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                    <i class="ti ti-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $user->name }}</h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $user->email }}</p>
+                </div>
             </div>
-            <a href="{{ route('admin.users.edit', $user) }}" 
-               class="px-4 py-2 bg-[#5E84ff] text-primary-foreground rounded-lg hover:bg-primary/90 transition inline-flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
+            <a href="{{ route('admin.users.edit', $user) }}"
+               class="inline-flex items-center gap-2 px-5 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition">
+                <i class="ti ti-edit"></i>
                 Edit User
             </a>
         </div>
-    </div>
 
-    <!-- Account Information -->
-    <div class="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-        <h3 class="text-lg font-semibold text-foreground mb-4">Account Information</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Account Number</p>
-                <p class="font-mono font-semibold text-foreground">{{ $user->account_number }}</p>
+        <!-- Account Information Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Account Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Account Number</p>
+                    <p class="font-mono text-lg font-bold text-gray-900 dark:text-white mt-1">{{ $user->account_number }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Phone</p>
+                    <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $user->phone ?? 'Not provided' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Balance</p>
+                    <p class="text-2xl font-bold text-primary mt-1">₦{{ number_format($user->balance, 2) }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Member Since</p>
+                    <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $user->created_at->format('M d, Y') }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Status</p>
+                    <div class="mt-1 flex items-center gap-2">
+                        <span class="px-3 py-1 text-xs font-bold rounded-full 
+                            @if($user->status === 'active') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                            @elseif($user->status === 'suspended') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                            @else bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 @endif">
+                            {{ ucfirst($user->status) }}
+                        </span>
+                        @if($user->trashed())
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                Trashed
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Tier</p>
+                    <span class="inline-block mt-1 px-4 py-1.5 text-xs font-bold rounded-full text-white
+                        @if($user->tier === 'tier 3') bg-gradient-to-r from-purple-600 to-pink-600
+                        @elseif($user->tier === 'tier 2') bg-gradient-to-r from-blue-600 to-cyan-600
+                        @elseif($user->tier === 'tier 1') bg-gradient-to-r from-green-600 to-emerald-600
+                        @else bg-gray-500 @endif">
+                        {{ ucwords(str_replace('_', ' ', $user->tier ?? 'tier 1')) }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">KYC Status</p>
+                    <div class="mt-1">
+                        @if($user->kyc_status === 'verified')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Verified</span>
+                        @elseif($user->kyc_status === 'pending')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Pending</span>
+                        @else
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Not Verified</span>
+                        @endif
+                    </div>
+                </div>
             </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Phone</p>
-                <p class="font-semibold text-foreground">{{ $user->phone ?? 'Not provided' }}</p>
-            </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Balance</p>
-                <p class="text-xl font-bold text-foreground">₦{{ number_format($user->balance, 2) }}</p>
-            </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Status</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-5">Quick Actions</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <button onclick="openCreditModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition group">
+                    <i class="ti ti-plus text-2xl text-green-600 dark:text-green-400"></i>
+                    <span class="text-sm font-medium">Credit</span>
+                </button>
+                <button onclick="openDebitModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition group">
+                    <i class="ti ti-minus text-2xl text-red-600 dark:text-red-400"></i>
+                    <span class="text-sm font-medium">Debit</span>
+                </button>
+                <button onclick="openTierModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition group">
+                    <i class="ti ti-star text-2xl text-purple-600 dark:text-purple-400"></i>
+                    <span class="text-sm font-medium">Upgrade Tier</span>
+                </button>
                 @if($user->status === 'active')
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        Active
-                    </span>
-                @elseif($user->status === 'inactive')
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                        Inactive
-                    </span>
-                @else
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
-                        </svg>
-                        Suspended
-                    </span>
-                @endif
-            </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Tier</p>
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-md text-sm font-medium">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    {{ ucfirst($user->tier) }}
-                </span>
-            </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">KYC Status</p>
-                @if($user->kyc_status === 'verified')
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        Verified
-                    </span>
-                @elseif($user->kyc_status === 'pending')
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                        </svg>
-                        Pending
-                    </span>
-                @else
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-sm font-medium">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                        Rejected
-                    </span>
-                @endif
-            </div>
-            <div class="space-y-1">
-                <p class="text-sm text-muted-foreground">Member Since</p>
-                <p class="font-semibold text-foreground">{{ $user->created_at->format('M d, Y') }}</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-        <h3 class="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            <!-- Credit Account -->
-            <button onclick="openCreditModal()" 
-                    class="px-4 py-3 bg-card border border-border rounded-lg hover:bg-accent transition text-left flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                    </div>
-                    <a href="{{ route('admin.users.credit', $user) }}" class="font-medium text-foreground">Credit Account</a>
-                </div>
-                <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
-
-            <!-- Debit Account -->
-            <button onclick="openDebitModal()" 
-                    class="px-4 py-3 bg-card border border-border rounded-lg hover:bg-accent transition text-left flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                        </svg>
-                    </div>
-                    <span class="font-medium text-foreground">Debit Account</span>
-                </div>
-                <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
-
-            <!-- Upgrade Tier -->
-            <button onclick="openTierModal()" 
-                    class="px-4 py-3 bg-card border border-border rounded-lg hover:bg-[#5E84ff] transition text-left flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                    </div>
-                    <span class="font-medium text-foreground">Upgrade Tier</span>
-                </div>
-                <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
-
-            <!-- Account Status Actions -->
-            @if($user->status === 'active')
-                <button onclick="openDeactivateModal()" 
-                        class="px-4 py-3 bg-card border border-border rounded-lg hover:bg-accent transition text-left flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                        </div>
-                        <span class="font-medium text-foreground">Deactivate Account</span>
-                    </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-                <button onclick="openSuspendModal()" 
-                        class="px-4 py-3 bg-card border border-border rounded-lg hover:bg-accent transition text-left flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <span class="font-medium text-foreground">Suspend Account</span>
-                    </div>
-                    <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            @else
-                <form action="{{ route('admin.users.activate', $user) }}" method="POST">
-                    @csrf
-                    <button type="submit" 
-                            class="w-full px-4 py-3 bg-card border border-border rounded-lg hover:bg-accent transition text-left flex items-center justify-between group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <span class="font-medium text-foreground">Activate Account</span>
-                        </div>
-                        <svg class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
+                    <button onclick="openDeactivateModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition group">
+                        <i class="ti ti-lock text-2xl text-gray-600 dark:text-gray-400"></i>
+                        <span class="text-sm font-medium">Deactivate</span>
                     </button>
-                </form>
-            @endif
+                    <button onclick="openSuspendModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition group">
+                        <i class="ti ti-alert-triangle text-2xl text-orange-600 dark:text-orange-400"></i>
+                        <span class="text-sm font-medium">Suspend</span>
+                    </button>
+                @else
+                    <form action="{{ route('admin.users.activate', $user) }}" method="POST" class="contents">
+                        @csrf
+                        <button type="submit" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition group">
+                            <i class="ti ti-user-check text-2xl text-green-600 dark:text-green-400"></i>
+                            <span class="text-sm font-medium">Activate</span>
+                        </button>
+                    </form>
+                @endif
+                @if(!$user->trashed())
+                    <button onclick="openDeleteModal()" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition group">
+                        <i class="ti ti-trash text-2xl text-red-600 dark:text-red-400"></i>
+                        <span class="text-sm font-medium text-red-600 dark:text-red-400">Delete</span>
+                    </button>
+                @else
+                    <form action="{{ route('admin.users.restore', $user) }}" method="POST" class="contents">
+                        @csrf
+                        <button type="submit" class="flex flex-col items-center gap-3 p-5 rounded-xl bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition group">
+                            <i class="ti ti-restore text-2xl text-green-600 dark:text-green-400"></i>
+                            <span class="text-sm font-medium">Restore</span>
+                        </button>
+                    </form>
+                @endif
+            </div>
+        </div>
 
-            <!-- Delete Account -->
-            <button onclick="openDeleteModal()" 
-                    class="px-4 py-3 bg-card border border-destructive/50 rounded-lg hover:bg-destructive/10 transition text-left flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Transactions</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">₦{{ number_format($totalTransactions ?? 0, 2) }}</p>
                     </div>
-                    <span class="font-medium text-destructive">Delete Account</span>
+                    <i class="ti ti-transfer-in text-3xl text-primary/70"></i>
                 </div>
-                <svg class="w-5 h-5 text-muted-foreground group-hover:text-destructive transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Savings</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">₦{{ number_format($totalSavings ?? 0, 2) }}</p>
+                    </div>
+                    <i class="ti ti-pig-money text-3xl text-blue-600 dark:text-blue-400"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Outstanding Loans</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">₦{{ number_format($totalLoans ?? 0, 2) }}</p>
+                    </div>
+                    <i class="ti ti-cash-banknote text-3xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
+            <div class="border-b border-gray-200 dark:border-gray-700">
+                <nav class="flex overflow-x-auto">
+                    <button class="tab-btn active px-8 py-4 text-sm font-medium border-b-2 border-primary text-primary" data-tab="transactions">Transactions</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" data-tab="savings">Savings</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" data-tab="loans">Loans</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-medium border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" data-tab="login">Login History</button>
+                </nav>
+            </div>
+
+            <div class="p-6">
+                <!-- Transactions Tab -->
+                <div id="transactions-tab" class="tab-content">
+                    <div class="overflow-x-hidden">
+                        <table class="w-full min-w-full">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($user->transfers as $transfer)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                        <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                            {{ $transfer->created_at->format('M d, Y') }}
+                                            <br><span class="text-xs text-gray-500">{{ $transfer->created_at->format('H:i') }}</span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-3 py-1 text-xs font-bold rounded-full text-white {{ $transfer->type === 'deposit' ? 'bg-green-600' : 'bg-red-600' }}">
+                                                {{ ucfirst($transfer->type) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold {{ $transfer->type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                            {{ $transfer->type === 'deposit' ? '+' : '-' }}₦{{ number_format($transfer->amount, 2) }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-3 py-1 text-xs font-bold rounded-full
+                                                {{ $transfer->status === 'successful' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                   ($transfer->status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400') }}">
+                                                {{ ucfirst($transfer->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                                            {{ $transfer->description ?? '—' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-xs font-mono text-gray-500 dark:text-gray-400">
+                                            {{ $transfer->reference }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-16 text-gray-500 dark:text-gray-400">
+                                            <i class="ti ti-receipt-off text-6xl mb-4 opacity-50"></i>
+                                            <p class="text-lg font-medium">No transactions yet</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Savings Plans Tab -->
+                <div id="savings-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @forelse($user->savingsPlans as $plan)
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h4 class="font-bold text-lg text-gray-900 dark:text-white">{{ $plan->plan_name }}</h4>
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full
+                                        {{ $plan->status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                           ($plan->status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300') }}">
+                                        {{ ucfirst($plan->status) }}
+                                    </span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">Target</span>
+                                        <span class="font-semibold">₦{{ number_format($plan->target_amount, 2) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">Saved</span>
+                                        <span class="font-bold text-green-600 dark:text-green-400">₦{{ number_format($plan->current_balance, 2) }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3">
+                                        @php $progress = $plan->target_amount > 0 ? ($plan->current_balance / $plan->target_amount) * 100 : 0 @endphp
+                                        <div class="bg-primary h-3 rounded-full transition-all" style="width: {{ min($progress, 100) }}%"></div>
+                                    </div>
+                                    <div class="text-right text-xs text-gray-500">
+                                        {{ number_format($progress, 1) }}% Complete
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full text-center py-16 text-gray-500 dark:text-gray-400">
+                                <i class="ti ti-pig-money text-6xl mb-4 opacity-50"></i>
+                                <p class="text-lg font-medium">No savings plans</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Loans Tab -->
+                <div id="loans-tab" class="tab-content hidden">
+                    <div class="space-y-4">
+                        @forelse($user->loans as $loan)
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h4 class="font-bold text-lg">Loan #{{ $loan->id }}</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $loan->loan_type ?? 'Personal Loan' }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full
+                                        {{ $loan->status === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                           ($loan->status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400') }}">
+                                        {{ ucfirst($loan->status) }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Amount</p>
+                                        <p class="font-bold">₦{{ number_format($loan->amount, 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Paid</p>
+                                        <p class="font-bold text-green-600 dark:text-green-400">₦{{ number_format($loan->amount_paid ?? 0, 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Balance</p>
+                                        <p class="font-bold text-red-600 dark:text-red-400">₦{{ number_format($loan->amount - ($loan->amount_paid ?? 0), 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Due Date</p>
+                                        <p class="font-medium">{{ $loan->due_date ? \Carbon\Carbon::parse($loan->due_date)->format('M d, Y') : '—' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-16 text-gray-500 dark:text-gray-400">
+                                <i class="ti ti-cash-banknote text-6xl mb-4 opacity-50"></i>
+                                <p class="text-lg font-medium">No loan records</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Login History Tab -->
+                <div id="login-tab" class="tab-content hidden">
+                    <div class="space-y-4">
+                        @forelse($loginHistory as $login)
+                            <div class="flex items-center justify-between p-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <i class="ti ti-device-desktop text-xl text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $login->ip_address ?? 'Unknown IP' }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ Str::limit($login->user_agent ?? 'Unknown Device', 50) }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ \Carbon\Carbon::createFromTimestamp($login->last_activity)->format('M d, Y') }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{ \Carbon\Carbon::createFromTimestamp($login->last_activity)->format('H:i A') }}</p>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-16 text-gray-500 dark:text-gray-400">
+                                <i class="ti ti-login text-6xl mb-4 opacity-50"></i>
+                                <p class="text-lg font-medium">No login history</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{{-- Credit Modal --}}
+<div id="creditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <i class="ti ti-plus text-xl text-green-600 dark:text-green-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Credit Account</h3>
+            </div>
+            <button onclick="closeCreditModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
             </button>
         </div>
-    </div>
-
-    <!-- Transaction Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-card rounded-lg border border-border shadow-sm p-6">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-                    </svg>
+        <form action="{{ route('admin.users.credit', $user) }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">₦</span>
+                        <input type="number" name="amount" step="0.01" required
+                               class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:text-white"
+                               placeholder="0.00">
+                    </div>
                 </div>
                 <div>
-                    <div class="text-sm text-muted-foreground">Total Transactions</div>
-                    <div class="text-2xl font-bold text-foreground">₦{{ number_format($totalTransactions, 2) }}</div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description (Optional)</label>
+                    <textarea name="description" rows="3"
+                              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:text-white"
+                              placeholder="Add a note..."></textarea>
                 </div>
             </div>
-        </div>
-        <div class="bg-card rounded-lg border border-border shadow-sm p-6">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm text-muted-foreground">Total Savings</div>
-                    <div class="text-2xl font-bold text-foreground">₦{{ number_format($totalSavings, 2) }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="bg-card rounded-lg border border-border shadow-sm p-6">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm text-muted-foreground">Total Loans</div>
-                    <div class="text-2xl font-bold text-foreground">₦{{ number_format($totalLoans, 2) }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="bg-card rounded-lg border border-border shadow-sm">
-        <div class="border-b border-border">
-            <nav class="flex -mb-px overflow-x-auto">
-                <button class="tab-btn active px-6 py-4 border-b-2 border-primary text-primary font-medium whitespace-nowrap" data-tab="transactions">
-                    Transactions
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeCreditModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
                 </button>
-                <button class="tab-btn px-6 py-4 border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border font-medium whitespace-nowrap" data-tab="savings">
-                    Savings Plans
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium">
+                    Credit Account
                 </button>
-                <button class="tab-btn px-6 py-4 border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border font-medium whitespace-nowrap" data-tab="loans">
-                    Loans
-                </button>
-                <button class="tab-btn px-6 py-4 border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border font-medium whitespace-nowrap" data-tab="login">
-                    Login History
-                </button>
-            </nav>
-        </div>
-
-        <div class="p-6">
-            <!-- Transactions Tab -->
-            <div id="transactions-tab" class="tab-content">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-border">
-                        <thead>
-                            <tr class="text-left">
-                                <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Created at</th>
-                                <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</th>
-                                <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Amount</th>
-                                <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
-                                 <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</th>
-                                  <th class="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            @forelse($user->transfers as $transfer)
-                            <tr class="hover:bg-accent/50">
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-foreground">
-                                    {{ $transfer->created_at->format('M d, Y') }}<br>
-                                    <span class="text-xs text-muted-foreground">{{ $transfer->created_at->format('H:i:s') }}</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm">
-                                    @if($transfer->type === 'deposit')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                                            </svg>
-                                            Deposit
-                                        </span>
-                                    @elseif($transfer->type === 'withdrawal')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                                            </svg>
-                                            Withdrawal
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md text-xs font-medium">
-                                            {{ ucfirst($transfer->type) }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold {{ $transfer->type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                    {{ $transfer->type === 'deposit' ? '+' : '-' }}₦{{ number_format($transfer->amount, 2) }}
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm">
-                                    @if($transfer->status === 'successful')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Successful
-                                        </span>
-                                    @elseif($transfer->status === 'pending')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Pending
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                            </svg>
-                                            {{ ucfirst($transfer->status) }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 text-sm text-muted-foreground max-w-xs truncate">
-                                    {{ $transfer->description ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm font-mono text-muted-foreground">
-                                    {{ $transfer->reference }}
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="px-4 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center text-muted-foreground">
-                                        <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                                        </svg>
-                                        <div class="text-lg font-medium">No transactions found</div>
-                                        <p class="text-sm mt-1">This user hasn't made any transactions yet</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
             </div>
-
-            <!-- Savings Plans Tab -->
-            <div id="savings-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @forelse($user->savingsPlans as $plan)
-                    <div class="border border-border rounded-lg p-5 hover:shadow-md transition bg-card">
-                        <div class="flex justify-between items-start mb-4">
-                            <h4 class="font-semibold text-foreground">{{ $plan->plan_name }}</h4>
-                            <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md text-xs font-medium">
-                                {{ ucfirst($plan->status) }}
-                            </span>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Target Amount:</span>
-                                <span class="font-semibold text-foreground">₦{{ number_format($plan->target_amount, 2) }}</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Current Balance:</span>
-                                <span class="font-semibold text-green-600 dark:text-green-400">₦{{ number_format($plan->current_balance, 2) }}</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Interest Rate:</span>
-                                <span class="font-semibold text-foreground">{{ $plan->interest_rate }}% p.a.</span>
-                            </div>
-                            <div class="w-full bg-secondary rounded-full h-2 mt-3">
-                                @php
-                                    $progress = $plan->target_amount > 0 ? ($plan->current_balance / $plan->target_amount) * 100 : 0;
-                                @endphp
-                                <div class="bg-primary h-2 rounded-full transition-all" style="width: {{ min($progress, 100) }}%"></div>
-                            </div>
-                            <div class="text-xs text-muted-foreground text-right">{{ number_format(min($progress, 100), 1) }}% Complete</div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
-                            Started: {{ $plan->created_at->format('M d, Y') }}
-                        </div>
-                    </div>
-                    @empty
-                    <div class="col-span-3 text-center py-12">
-                        <div class="flex flex-col items-center justify-center text-muted-foreground">
-                            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <div class="text-lg font-medium">No savings plans</div>
-                            <p class="text-sm mt-1">This user hasn't created any savings plans yet</p>
-                        </div>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Loans Tab -->
-            <div id="loans-tab" class="tab-content hidden">
-                <div class="space-y-4">
-                    @forelse($user->loans as $loan)
-                    <div class="border border-border rounded-lg p-5 hover:shadow-md transition bg-card">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="font-semibold text-foreground">Loan #{{ $loan->id }}</h4>
-                                <p class="text-sm text-muted-foreground">{{ $loan->loan_type ?? 'Personal Loan' }}</p>
-                            </div>
-                            @php
-                                $statusColors = [
-                                    'approved' => 'green',
-                                    'pending' => 'yellow',
-                                    'rejected' => 'red',
-                                ];
-                                $status = $loan->status;
-                                $color = $statusColors[$status] ?? 'gray';
-                            @endphp
-                            <span class="px-3 py-1 bg-{{ $color }}-100 dark:bg-{{ $color }}-900/30 text-{{ $color }}-700 dark:text-{{ $color }}-400 rounded-full text-xs font-medium">
-                                {{ ucfirst($loan->status) }}
-                            </span>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <div class="text-xs text-muted-foreground mb-1">Loan Amount</div>
-                                <div class="font-semibold text-foreground">₦{{ number_format($loan->amount, 2) }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-muted-foreground mb-1">Amount Paid</div>
-                                <div class="font-semibold text-green-600 dark:text-green-400">₦{{ number_format($loan->amount_paid ?? 0, 2) }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-muted-foreground mb-1">Balance</div>
-                                <div class="font-semibold text-red-600 dark:text-red-400">₦{{ number_format(($loan->amount - ($loan->amount_paid ?? 0)), 2) }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-muted-foreground mb-1">Interest Rate</div>
-                                <div class="font-semibold text-foreground">{{ $loan->interest_rate ?? 0 }}%</div>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-border flex justify-between text-xs text-muted-foreground">
-                            <span>Applied: {{ $loan->created_at->format('M d, Y') }}</span>
-                            @if($loan->due_date)
-                            <span>Due: {{ \Carbon\Carbon::parse($loan->due_date)->format('M d, Y') }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    @empty
-                    <div class="text-center py-12">
-                        <div class="flex flex-col items-center justify-center text-muted-foreground">
-                            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <div class="text-lg font-medium">No loans</div>
-                            <p class="text-sm mt-1">This user hasn't applied for any loans</p>
-                        </div>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Login History Tab -->
-            <div id="login-tab" class="tab-content hidden">
-                <div class="space-y-3">
-                    @forelse($loginHistory as $login)
-                    <div class="flex items-center justify-between py-4 px-4 border border-border rounded-lg hover:bg-accent/50 transition">
-                        <div class="flex items-center gap-4">
-                            <div class="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-sm font-medium text-foreground">{{ $login->ip_address ?? 'Unknown IP' }}</div>
-                                <div class="text-xs text-muted-foreground">{{ Str::limit($login->user_agent ?? 'Unknown Device', 60) }}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-medium text-foreground">
-                                {{ \Carbon\Carbon::createFromTimestamp($login->last_activity)->format('M d, Y') }}
-                            </div>
-                            <div class="text-xs text-muted-foreground">
-                                {{ \Carbon\Carbon::createFromTimestamp($login->last_activity)->format('H:i:s') }}
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="text-center py-12">
-                        <div class="flex flex-col items-center justify-center text-muted-foreground">
-                            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                            <div class="text-lg font-medium">No login history available</div>
-                            <p class="text-sm mt-1">No recent login sessions recorded</p>
-                        </div>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
+{{-- Debit Modal --}}
+<div id="debitModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <i class="ti ti-minus text-xl text-red-600 dark:text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Debit Account</h3>
+            </div>
+            <button onclick="closeDebitModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('admin.users.debit', $user) }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">₦</span>
+                        <input type="number" name="amount" step="0.01" required max="{{ $user->balance }}"
+                               class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:text-white"
+                               placeholder="0.00">
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Available balance: ₦{{ number_format($user->balance, 2) }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description (Optional)</label>
+                    <textarea name="description" rows="3"
+                              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:text-white"
+                              placeholder="Add a note..."></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeDebitModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium">
+                    Debit Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Tier Upgrade Modal --}}
+<div id="tierModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <i class="ti ti-star text-xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Update Tier</h3>
+            </div>
+            <button onclick="closeTierModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
+            </button>
+        </div>
+        <form action="" method="POST">
+            @csrf
+            @method('PATCH')
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Tier</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition {{ $user->tier === 'tier 1' ? 'bg-green-50 dark:bg-green-900/20 border-green-500' : '' }}">
+                            <input type="radio" name="tier" value="tier 1" {{ $user->tier === 'tier 1' ? 'checked' : '' }} class="w-4 h-4 text-green-600">
+                            <span class="ml-3 flex-1">
+                                <span class="block font-medium text-gray-900 dark:text-white">Tier 1</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Basic tier</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition {{ $user->tier === 'tier 2' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500' : '' }}">
+                            <input type="radio" name="tier" value="tier 2" {{ $user->tier === 'tier 2' ? 'checked' : '' }} class="w-4 h-4 text-blue-600">
+                            <span class="ml-3 flex-1">
+                                <span class="block font-medium text-gray-900 dark:text-white">Tier 2</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Intermediate tier</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-purple-500 dark:hover:border-purple-500 transition {{ $user->tier === 'tier 3' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-500' : '' }}">
+                            <input type="radio" name="tier" value="tier 3" {{ $user->tier === 'tier 3' ? 'checked' : '' }} class="w-4 h-4 text-purple-600">
+                            <span class="ml-3 flex-1">
+                                <span class="block font-medium text-gray-900 dark:text-white">Tier 3</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Premium tier</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeTierModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition font-medium">
+                    Update Tier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Suspend Modal --}}
+<div id="suspendModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                    <i class="ti ti-alert-triangle text-xl text-orange-600 dark:text-orange-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Suspend User</h3>
+            </div>
+            <button onclick="closeSuspendModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('admin.users.suspend', $user) }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <p class="text-gray-600 dark:text-gray-400">Are you sure you want to suspend <strong>{{ $user->name }}</strong>? They will not be able to access their account.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason (Optional)</label>
+                    <textarea name="reason" rows="3"
+                              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 dark:text-white"
+                              placeholder="Suspension reason..."></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeSuspendModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition font-medium">
+                    Suspend User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Deactivate Modal --}}
+<div id="deactivateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="ti ti-lock text-xl text-gray-600 dark:text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Deactivate User</h3>
+            </div>
+            <button onclick="closeDeactivateModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('admin.users.deactivate', $user) }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <p class="text-gray-600 dark:text-gray-400">Are you sure you want to deactivate <strong>{{ $user->name }}</strong>? They will not be able to access their account.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason (Optional)</label>
+                    <textarea name="reason" rows="3"
+                              class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:text-white"
+                              placeholder="Deactivation reason..."></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeDeactivateModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition font-medium">
+                    Deactivate User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Delete Modal --}}
+<div id="deleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <i class="ti ti-trash text-xl text-red-600 dark:text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Delete User</h3>
+            </div>
+            <button onclick="closeDeleteModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ti ti-x text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('admin.users.destroy', $user) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="space-y-4">
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-sm text-red-800 dark:text-red-300">
+                        <i class="ti ti-alert-triangle mr-2"></i>
+                        <strong>Warning:</strong> This action will soft delete the user. They can be restored later from the trash.
+                    </p>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Are you sure you want to delete <strong>{{ $user->name }}</strong>?</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeDeleteModal()"
+                        class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium">
+                    Delete User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
 <script>
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab;
-        
-        // Update buttons
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('active', 'border-primary', 'text-primary');
-            b.classList.add('border-transparent', 'text-muted-foreground');
+    // Tab Switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
+            
+            // Update button states
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'border-primary', 'text-primary');
+                b.classList.add('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+            });
+            btn.classList.add('active', 'border-primary', 'text-primary');
+            btn.classList.remove('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${targetTab}-tab`).classList.remove('hidden');
         });
-        btn.classList.add('active', 'border-primary', 'text-primary');
-        btn.classList.remove('border-transparent', 'text-muted-foreground');
-        
-        // Update content
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.add('hidden');
-        });
-        document.getElementById(tab + '-tab').classList.remove('hidden');
     });
-});
 
-// Modal functions
-function openCreditModal() { 
-    const modal = document.getElementById('creditModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
-function openDebitModal() { 
-    const modal = document.getElementById('debitModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
-function openTierModal() { 
-    const modal = document.getElementById('tierModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
-function openDeactivateModal() { 
-    const modal = document.getElementById('deactivateModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
-function openSuspendModal() { 
-    const modal = document.getElementById('suspendModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
-function openDeleteModal() { 
-    const modal = document.getElementById('deleteModal');
-    if (modal) modal.classList.remove('hidden'); 
-}
+    // Modal Functions
+    function openCreditModal() {
+        document.getElementById('creditModal').classList.remove('hidden');
+    }
+    function closeCreditModal() {
+        document.getElementById('creditModal').classList.add('hidden');
+    }
 
-function closeModal(modalId) { 
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('hidden'); 
-}
+    function openDebitModal() {
+        document.getElementById('debitModal').classList.remove('hidden');
+    }
+    function closeDebitModal() {
+        document.getElementById('debitModal').classList.add('hidden');
+    }
 
-// Close modal on background click
-document.addEventListener('DOMContentLoaded', function() {
+    function openTierModal() {
+        document.getElementById('tierModal').classList.remove('hidden');
+    }
+    function closeTierModal() {
+        document.getElementById('tierModal').classList.add('hidden');
+    }
+
+    function openSuspendModal() {
+        document.getElementById('suspendModal').classList.remove('hidden');
+    }
+    function closeSuspendModal() {
+        document.getElementById('suspendModal').classList.add('hidden');
+    }
+
+    function openDeactivateModal() {
+        document.getElementById('deactivateModal').classList.remove('hidden');
+    }
+    function closeDeactivateModal() {
+        document.getElementById('deactivateModal').classList.add('hidden');
+    }
+
+    function openDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    // Close modals on outside click
     document.querySelectorAll('[id$="Modal"]').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.add('hidden');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
             }
         });
     });
-});
+
+    // Close modals on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+        }
+    });
 </script>
-@endsection 
+@endpush
+
+@endsection

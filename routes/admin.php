@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VirtualCardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware('auth', 'can:access-admin-dashboard')->group(function () {
@@ -24,14 +25,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth', 'can:access-admin-das
         Route::post('/{user}/suspend', [UserController::class, 'suspend'])->name('suspend');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         
-        // Financial Actions
-        //  Route::get('{user}/credit', [UserController::class, 'showCreditForm'])
-        //     ->name('credit.show');
-        
-        // // Process credit
-        // Route::post('{user}/credit', [UserController::class, 'credit'])
-        //     ->name('credit');
-        // Route::get('manage/{user}/balance', [UserController::class, 'showBalanceForm'])->name('balance.show');
+        // Soft delete & restore
+    // Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+    // Route::post('/{user}/restore', [UserController::class, 'restore'])->name('restore');
+
+    Route::get('/trashed', [UserController::class, 'trashed'])->name('trashed');
+
+    
+    Route::post('/{user}/restore', [UserController::class, 'restore'])->name('restore');
+    Route::delete('/{user}/force', [UserController::class, 'forceDelete'])->name('force-delete');
+       
         Route::post('manage/{user}/credit', [UserController::class, 'credit'])->name('credit');
         Route::post('manage/{user}/debit', [UserController::class, 'debit'])->name('debit');
         
@@ -61,5 +64,15 @@ Route::prefix('loans')->name('loans.')->group(function () {
     Route::post('/{loan}/reject', [LoanController::class, 'reject'])->name('reject');
     Route::post('/{loan}/mark-paid', [LoanController::class, 'markPaid'])->name('mark-paid');
     Route::get('/download/report', [LoanController::class, 'downloadReport'])->name('download');
+});
+
+// Admin Virtual Card Management Routes
+Route::prefix('virtual-cards')->name('virtual-cards.')->group(function () {
+    Route::get('/', [VirtualCardController::class, 'index'])->name('index');
+    Route::get('/{virtualCard}', [VirtualCardController::class, 'show'])->name('show');
+    Route::post('/{virtualCard}/block', [VirtualCardController::class, 'block'])->name('block');
+    Route::post('/{virtualCard}/unblock', [VirtualCardController::class, 'unblock'])->name('unblock');
+    Route::delete('/{virtualCard}', [VirtualCardController::class, 'destroy'])->name('destroy');
+    Route::get('/download/report', [VirtualCardController::class, 'downloadReport'])->name('download');
 });
 });

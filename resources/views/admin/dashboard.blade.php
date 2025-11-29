@@ -134,7 +134,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
             <div class="p-4 md:p-6 border-b dark:border-gray-700 flex justify-between items-center">
                 <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Recent Transactions</h3>
-                <a href="#" class="text-primary text-xs md:text-sm font-medium hover:underline">View All</a>
+                <a href="{{ route('admin.transactions.index') }}" class="text-primary text-xs md:text-sm font-medium hover:underline">View All</a>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
                 @forelse($recentTransactions->take(5) as $transaction)
@@ -174,7 +174,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
             <div class="p-4 md:p-6 border-b dark:border-gray-700 flex justify-between items-center">
                 <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">New Users</h3>
-                <a href="#" class="text-primary text-xs md:text-sm font-medium hover:underline">View All</a>
+                <a href="{{ route('admin.users.index') }}" class="text-primary text-xs md:text-sm font-medium hover:underline">View All</a>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
                 @forelse($recentUsers as $user)

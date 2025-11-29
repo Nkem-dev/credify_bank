@@ -67,10 +67,11 @@ class LoanController extends Controller
     /**
      * Show loan details
      */
-    public function show(Loan $loan)
+    public function show(Loan $loan) //route model binding
     {
-        $loan->load('user');
+        $loan->load('user');// eager load the loan and the user
 
+        // return view with user's loan
         return view('admin.loans.show', compact('loan'));
     }
 
@@ -79,29 +80,31 @@ class LoanController extends Controller
      */
     public function approve(Request $request, Loan $loan)
     {
-        // Only pending loans can be approved
+        // Only pending loans can be approved, check if loan is pending
         if ($loan->status !== 'pending') {
             return back()->with('error', 'Only pending loans can be approved.');
         }
 
+        // vaalidate inputs
         $request->validate([
             'transaction_pin' => 'required|digits:4',
             'notes' => 'nullable|string|max:500',
         ]);
 
+        // get the currentl logged in admin user
         $admin = auth()->user();
 
-        // Verify admin PIN
+        // Verify admin transaction pin
         if (!Hash::check($request->transaction_pin, $admin->transaction_pin)) {
             return back()->with('error', 'Incorrect transaction PIN.');
         }
 
-        DB::beginTransaction();
+        DB::beginTransaction(); //begin task
 
         try {
-            $user = $loan->user;
+            $user = $loan->user; //get the user's loan
 
-            // Update loan status
+            // Update loan status to approved
             $loan->update([
                 'status' => 'approved',
                 'approved_at' => now(),
@@ -136,8 +139,9 @@ class LoanController extends Controller
                 ]),
             ]);
 
-            DB::commit();
+            DB::commit(); //commit to database
 
+            // save record in log file
             Log::channel('admin_actions')->info('Admin approved loan', [
                 'admin_id' => $admin->id,
                 'loan_id' => $loan->id,
@@ -145,10 +149,11 @@ class LoanController extends Controller
                 'amount' => $loan->amount,
             ]);
 
+            // return with success message
             return back()->with('success', 'Loan approved and ₦' . number_format($loan->amount, 2) . ' credited to user account!');
 
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::rollBack(); //rollback changes if it fails
             Log::error('Loan approval failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to approve loan. Please try again.');
         }
@@ -164,15 +169,18 @@ class LoanController extends Controller
             return back()->with('error', 'Only pending loans can be rejected.');
         }
 
+        // validate input
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
 
         try {
+            // update status
             $loan->update([
                 'status' => 'rejected',
             ]);
 
+            // save log info
             Log::channel('admin_actions')->info('Admin rejected loan', [
                 'admin_id' => auth()->id(),
                 'loan_id' => $loan->id,
@@ -180,6 +188,7 @@ class LoanController extends Controller
                 'reason' => $request->reason,
             ]);
 
+            // return with success message
             return back()->with('success', 'Loan application rejected.');
 
         } catch (Exception $e) {
@@ -191,34 +200,38 @@ class LoanController extends Controller
     /**
      * Mark loan as fully paid
      */
-    public function markPaid(Request $request, Loan $loan)
+    public function markPaid(Request $request, Loan $loan) //route model binding
     {
-        // Only approved loans can be marked as paid
+        // Only approved loans can be marked as paid; if the loan is not approved
         if ($loan->status !== 'approved') {
             return back()->with('error', 'Only approved loans can be marked as paid.');
         }
 
+        // if the loan has a status of completed, you cannot mark as paid
         if ($loan->status === 'completed') {
             return back()->with('error', 'This loan is already marked as paid.');
         }
 
+        // validate inputs
         $request->validate([
             'transaction_pin' => 'required|digits:4',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $admin = auth()->user();
+        $admin = auth()->user(); //user that is the admin
 
-        // Verify admin PIN
+        // Verify admin  transaction pin
         if (!Hash::check($request->transaction_pin, $admin->transaction_pin)) {
             return back()->with('error', 'Incorrect transaction PIN.');
         }
 
         try {
+            // update loan status
             $loan->update([
                 'status' => 'completed',
             ]);
 
+            // log to admin_actions
             Log::channel('admin_actions')->info('Admin marked loan as paid', [
                 'admin_id' => $admin->id,
                 'loan_id' => $loan->id,
@@ -226,6 +239,7 @@ class LoanController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            //return with success message
             return back()->with('success', 'Loan marked as fully paid!');
 
         } catch (Exception $e) {
@@ -239,27 +253,31 @@ class LoanController extends Controller
      */
     public function downloadReport(Request $request)
     {
-        $query = Loan::with('user');
+        $query = Loan::with('user'); //get the user's loan(eager load)
 
-        // Apply filters
+        // Apply filters; search by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // get the, by descending order(newest)
         $loans = $query->orderBy('created_at', 'desc')->get();
 
         // Generate CSV
         $filename = 'loans_report_' . date('Y-m-d_His') . '.csv';
         
+        // headers to tell the browser to download the file
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
+        // Stream the CSV output
+        // CSV is generated using a streaming callback, which is memory efficient
         $callback = function() use ($loans) {
             $file = fopen('php://output', 'w');
 
-            // Header row
+              // CSV header row
             fputcsv($file, [
                 'Loan ID',
                 'User Name',
@@ -274,8 +292,9 @@ class LoanController extends Controller
                 'Disbursed Date'
             ]);
 
-            // Data rows
+             // loan Data rows
             foreach ($loans as $loan) {
+                 //  fputcsv formats each line to csv format
                 fputcsv($file, [
                     $loan->id,
                     $loan->user->name ?? 'N/A',
@@ -291,9 +310,12 @@ class LoanController extends Controller
                 ]);
             }
 
-            fclose($file);
+            fclose($file); //close file stream
         };
 
+        
+        // This line tells Laravel to stream a response back to the browser.
+// Instead of generating the whole CSV file in memory first, Laravel sends the file piece by piece as it is being created.
         return response()->stream($callback, 200, $headers);
     }
 }

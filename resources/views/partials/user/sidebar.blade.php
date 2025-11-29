@@ -65,7 +65,7 @@
         </a>
 
         <!-- Deposit -->
-        <a href="" 
+        <a href="{{ route('user.deposit.create') }}" 
            class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                   hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
                   {{ request()->routeIs('user.deposit*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">

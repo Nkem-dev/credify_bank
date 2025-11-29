@@ -12,7 +12,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto fancy-scrollbar">
         <!-- Dashboard -->
         <a href="{{ route('admin.dashboard') }}" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
@@ -68,6 +68,16 @@
     <span>Loans</span>
 </a>
 
+<!-- Virtual Cards -->
+<a href="{{ route('admin.virtual-cards.index') }}" 
+   class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+          hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
+          {{ request()->routeIs('admin.virtual-cards*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+    <i class="ti ti-credit-card text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+           {{ request()->routeIs('admin.virtual-cards*') ? 'text-white' : '' }}"></i>
+    <span>Virtual Cards</span>
+</a>
+
         <!-- Settings -->
         <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
@@ -93,3 +103,67 @@
         </div>
     </div>
 </aside>
+<style>
+    /* Fancy Scrollbar - Works for both Admin & User Sidebars */
+    .fancy-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 6px;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
+    /* Dark Mode */
+    .dark .fancy-scrollbar {
+        scrollbar-color: #64748b #1f2937;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-thumb {
+        background: #64748b;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Smooth hover shine effect on sidebar links */
+    .sidebar-link {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent);
+        transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar-link:hover::before {
+        left: 100%;
+    }
+</style>

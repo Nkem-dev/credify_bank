@@ -29,6 +29,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'dob',
+        'role',
         'gender',
         'account_number',
         'email_verification_otp',
@@ -152,12 +153,61 @@ public function getRegistrationPhoneAttribute()
 
   
 
-public function getInvestmentValueAttribute() 
+// public function getInvestmentValueAttribute() 
+// {
+//      return $this->attributes['investment_value'] ?? 0.00; 
+//     }
+
+// relationship with investment
+public function investment()
+{ //this user has one investment
+    return $this->hasOne(Investment::class);
+}
+
+// Helper method to get investment value
+public function getInvestmentValueAttribute()
 {
-     return $this->attributes['investment_value'] ?? 0.00; 
-    }
+    return $this->investment ? $this->investment->current_value : 0;
+}
 
+// Helper method to get YTD return
+public function getInvestmentYtdAttribute()
+{
+    return $this->investment ? $this->investment->ytd_return : 0;
+}
 
+// relationship with user stock
+public function userStocks()
+{ //this user has many userstock
+    return $this->hasMany(UserStock::class);
+}
+
+// relationship wit stock transaction
+public function stockTransactions()
+{ //this user has many stock transaction
+    return $this->hasMany(StockTransaction::class);
+}
+
+// relationship with watchlist
+public function watchlist()
+{ //this user has many watchlist
+    return $this->hasMany(Watchlist::class);
+}
+
+// Calculate total investment value
+public function calculateInvestmentValue()
+{
+    return $this->userStocks()->with('stock')->get()->sum(function ($userStock) {
+        return $userStock->quantity * $userStock->stock->current_price;
+    });
+}
+
+// Update investment value
+public function updateInvestmentValue()
+{
+    $this->investment_value = $this->calculateInvestmentValue();
+    $this->save();
+}
     // relationship for virtual card
    public function virtualCard()
 { //user has one virtual card

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Investment;
 use App\Models\Loan;
 use App\Models\SavingsPlan;
 use App\Models\Transfer;
@@ -77,6 +78,14 @@ class AdminDashboardController extends Controller
         $totalLoansAmount = Loan::where('status', 'approved')->sum('amount');
         $loansRepaidAmount = Loan::where('status', 'completed')->sum('amount');
 
+
+        // ==================== INVESTMENT STATISTICS ====================
+        $totalInvestments = Investment::sum('current_value');
+        $totalInvestors = Investment::where('current_value', '>', 0)->count();
+        $investmentGrowthThisMonth = Investment::whereMonth('created_at', now()->month)->count();
+        $totalProfitLoss = Investment::sum('total_profit_loss');
+
+        
         // ==================== REVENUE STATISTICS ====================
         $revenueToday = Transfer::whereDate('created_at', today())->sum('fee');
         $revenueThisWeek = Transfer::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('fee');
@@ -181,6 +190,13 @@ class AdminDashboardController extends Controller
     
     // Pending
     'pendingKYC' => $pendingKYC,
+
+    // Investments 
+    'totalInvestments' => $totalInvestments,
+    'totalInvestors' => $totalInvestors,
+    'investmentGrowthThisMonth' => $investmentGrowthThisMonth,
+    'totalProfitLoss' => $totalProfitLoss,
+    
     
    
     // Recent Data

@@ -37,6 +37,15 @@ class AuthenticatedSessionController extends Controller
         
         $user = User::find(Auth::id());
 
+
+        // Skip email verification for customer care staff
+        if ($user->role === 'customer_care') {
+            // Give new login session
+            $request->session()->regenerate();
+            
+            return $this->sendLoginResponse($request);
+        }
+
         // check if user needs verification
         if(!$user->email_verified_at){
             Auth::logout();
@@ -80,7 +89,16 @@ class AuthenticatedSessionController extends Controller
      protected function sendLoginResponse(): RedirectResponse
     {
 
-        $user = Auth::user();
+        $user = Auth::user(); //get authenticated user
+
+         // Skip PIN check for customer care
+        if ($user->role !== 'customer_care') {
+            // CHECK IF USER HAS SET TRANSACTION PIN
+            if (!$user->hasSetPin()) {
+                return redirect()->route('pin.setup')
+                    ->with('info', 'Please set your transaction PIN to continue.');
+            }
+        }
 
         // CHECK IF USER HAS SET TRANSACTION PIN
         if (!$user->hasSetPin()) {

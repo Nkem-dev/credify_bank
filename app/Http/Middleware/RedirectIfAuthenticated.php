@@ -29,7 +29,7 @@ class RedirectIfAuthenticated
             }
 
              if($user->role === 'customer_care') { //if the user has the role of customer care
-                return redirect()->route('customer_care.dashboard'); //redirect to admin dasboard
+                return redirect()->route('customer_care.dashboard'); //redirect to customer care dashboard
             }
         }
         

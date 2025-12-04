@@ -63,25 +63,7 @@
             <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">Set Your Transaction PIN</h2>
             <p class="text-center text-gray-600 dark:text-gray-400 mb-8">This 4-digit PIN will secure all transactions</p>
 
-            <!-- Success Message -->
-            {{-- @if(session('success'))
-                <div class="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-circle-check text-emerald-600 dark:text-emerald-400 text-xl mt-0.5"></i>
-                    <p class="text-sm font-medium">{{ session('success') }}</p>
-                </div>
-            @endif --}}
-
-            <!-- Error Messages -->
-            {{-- @if($errors->any())
-                <div class="mb-6 p-4 bg-danger/10 border border-danger rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-alert-circle text-danger text-xl mt-0.5"></i>
-                    <div>
-                        @foreach($errors->all() as $error)
-                            <p class="text-sm text-danger font-medium">{{ $error }}</p>
-                        @endforeach
-                    </div>
-                </div>
-            @endif --}}
+           
 
             <!-- Form -->
             <form action="{{ route('pin.store') }}" method="POST">

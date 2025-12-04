@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         // register the seeders
         $this->call([
         NigerianBanksSeeder::class,
+         StockSeeder::class,
         ]);
     }
 }

@@ -6,7 +6,7 @@
     <div class="mb-6 md:mb-8 mt-20">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           Welcome, 
-            <span class="text-[#5E84ff]">{{ Auth::user()->name }}</span>
+            <span class="text-primary">{{ Auth::user()->name }}</span>
         </h1>
         <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm md:text-base">
             Monitor and manage Credify Bank operations
@@ -78,8 +78,27 @@
                 {{ $pendingLoanApplications }} loans, {{ $pendingKYC }} KYC
             </p>
         </div>
+
+        <!-- Investments -->
+        <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-sm border dark:border-gray-700 hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <i class="ti ti-chart-line text-xl md:text-2xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <span class="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-1 rounded-full">
+                    Active
+                </span>
+            </div>
+            <h3 class="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-1">Total Investments</h3>
+            <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">₦{{ number_format($totalInvestments ?? 0, 2) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {{ number_format($totalInvestors ?? 0) }} investors
+            </p>
+        </div>
+        
     </div>
 
+    
     <!-- Secondary Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <!-- Deposits -->

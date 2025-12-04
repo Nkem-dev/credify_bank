@@ -158,16 +158,16 @@
                 <div class="logo">
                     <span>CB</span>
                 </div>
-                <h1>Your OTP Code</h1>
+                <h1>Your Reset Password OTP Code</h1>
                 <p>Verify your email address</p>
             </div>
 
             <!-- Body -->
             <div class="email-body">
-               <p class="greeting">Hi there</p>
+               <p class="greeting">Hi {{ $user->name }},</p>
 
                 <p class="message">
-                    We received a request to verify your email address for your Credify Bank account.
+                    We received a request to verify your email address to reset your password for your Credify Bank account.
                 </p>
 
                 <!-- OTP Code Box -->

@@ -58,25 +58,8 @@
                 Last updated: <span id="lastUpdated">{{ now()->format('M d, Y \a\t g:i A') }}</span>
             </p>
         </div>
-{{-- 
-        <!-- Savings Summary with Hide/Show -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Savings</h3>
-                <button id="toggleSavingsBtn" class="text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition">
-                    <i class="ti ti-eye text-xl" id="savingsEyeIcon"></i>
-                </button>
-            </div>
-            <p id="savingsDisplay"
-               data-amount="{{ Auth::check() ? (Auth::user()->savings_balance ?? 125000.00) : 125000.00 }}"
-               class="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">
-                ₦{{ number_format(Auth::check() ? (Auth::user()->savings_balance ?? 125000.00) : 125000.00, 2) }}
-            </p>
-            <p id="savingsHidden" class="text-2xl font-mono text-gray-400 hidden">••••••••</p>
-            <p class="text-xs text-green-600 dark:text-green-400 mt-1">+5.2% interest</p>
-        </div> --}}
 
-        <!-- resources/views/dashboard.blade.php (or the card partial) -->
+
 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
     <div class="flex items-center justify-between mb-2">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Savings</h3>
@@ -104,7 +87,7 @@
 </div>
 
         <!-- Investments Summary with Hide/Show -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+        {{-- <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Investments</h3>
                 <button id="toggleInvestmentsBtn" class="text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 transition">
@@ -118,7 +101,26 @@
             </p>
             <p id="investmentsHidden" class="text-2xl font-mono text-gray-400 hidden">••••••••</p>
             <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">+12.4% YTD</p>
-        </div>
+        </div> --}}
+
+        <!-- Investments Summary  -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+    <div class="flex items-center justify-between mb-2">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Investments</h3>
+        <button id="toggleInvestmentsBtn" class="text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 transition">
+            <i class="ti ti-eye text-xl" id="investmentsEyeIcon"></i>
+        </button>
+    </div>
+    <p id="investmentsDisplay"
+       data-amount="{{ Auth::user()->investment ? Auth::user()->investment->current_value : 0 }}"
+       class="text-2xl font-bold text-purple-600 dark:text-purple-400 font-mono">
+        ₦{{ number_format(Auth::user()->investment ? Auth::user()->investment->current_value : 0, 2) }}
+    </p>
+    <p id="investmentsHidden" class="text-2xl font-mono text-gray-400 hidden">••••••••</p>
+    <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">
+        {{ Auth::user()->investment && Auth::user()->investment->ytd_return > 0 ? '+' : '' }}{{ number_format(Auth::user()->investment ? Auth::user()->investment->ytd_return : 0, 1) }}% YTD
+    </p>
+</div>
     </div>
 
    @auth
@@ -314,7 +316,7 @@
 </div>
 
     <!-- Announcements / News -->
-    <div class="bg-gradient-to-r from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 p-6 rounded-xl border dark:border-gray-700 mb-8 mt-10">
+    {{-- <div class="bg-gradient-to-r from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 p-6 rounded-xl border dark:border-gray-700 mb-8 mt-10">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">What's New?</h3>
         <div class="space-y-3">
             <div class="flex items-start space-x-3">
@@ -332,7 +334,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </main>
 
 {{-- JavaScript for Interactivity --}}

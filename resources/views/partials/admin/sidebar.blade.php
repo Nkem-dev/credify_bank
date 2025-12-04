@@ -50,12 +50,21 @@
         </a>
 
         <!-- Reports -->
-        <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+        {{-- <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
                {{ request()->is('admin/reports*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
             <i class="ti ti-file-analytics text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
                    {{ request()->is('admin/reports*') ? 'text-white' : '' }}"></i>
             <span>Reports</span>
+        </a> --}}
+
+         <!-- Investments -->
+        <a href="{{ route('admin.investments.index') }}" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+               hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
+               {{ request()->is('admin/investments*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+            <i class="ti ti-chart-line text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+                   {{ request()->is('admin/investments*') ? 'text-white' : '' }}"></i>
+            <span>Investments</span>
         </a>
 
        <!-- Loans -->
@@ -76,6 +85,18 @@
     <i class="ti ti-credit-card text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
            {{ request()->routeIs('admin.virtual-cards*') ? 'text-white' : '' }}"></i>
     <span>Virtual Cards</span>
+</a>
+
+
+
+<!-- Customer Care -->
+<a href="{{ route('admin.customer-care.index') }}" 
+   class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+          hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
+          {{ request()->routeIs('admin.customer-care*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
+    <i class="ti ti-headset text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
+           {{ request()->routeIs('admin.customer-care*') ? 'text-white' : '' }}"></i>
+    <span>Customer Care</span>
 </a>
 
         <!-- Settings -->

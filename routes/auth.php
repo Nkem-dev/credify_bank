@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -31,6 +32,25 @@ Route::middleware('redirect.if.authenticated')->group(function () {
     Route::post('/resentOtp/{token}', [RegisteredUserController::class, 'resendOtp'])->name('user.otp-resend');
 
    
+    
+    // forgot password route
+    Route::controller(ForgotPasswordController::class)->group(function () {
+        Route::get('forgot-password', 'showEmailForm')->name('password.reset'); //return the form
+        Route::post('/forgot-password', 'submitEmail')->name('email.submit');  //submit form
+
+        // route to show otp form
+        Route::get('confirm-code/{token}', 'showConfirmationCode')->name('confirm.code');
+
+        // route to submit otp
+         Route::post('/verify-password-otp/{token}', 'verifyPasswordOtp')->name('user.verify-password-otp');
+         
+        //  redirect to return reset password view
+        Route::get('/reset-password{token}', 'showResetPasswordForm' )->name('password.reset.form');
+
+        // submit new password
+        Route::post('/reset-password/{token}', 'submitResetPassword')->name('reset.password.submit');
+
+    });
    
 
 
@@ -42,7 +62,7 @@ Route::middleware('redirect.if.authenticated')->group(function () {
     
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function () {('password.update');
 
     // route for set transaction pin
      Route::get('/set-pin', [TransactionPinController::class, 'show'])

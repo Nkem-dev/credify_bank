@@ -4,14 +4,18 @@ use App\Http\Controllers\Paystack\PaymentStatusController;
 use App\Http\Controllers\Paystack\PaystackCallbackController;
 use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\User\DepositController;
+use App\Http\Controllers\User\InvestmentController;
 use App\Http\Controllers\User\LoanController;
+use App\Http\Controllers\User\PortfolioController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\SavingsController;
 use App\Http\Controllers\User\SettingsController;
+use App\Http\Controllers\User\StockController;
 use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\TransferController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\VirtualCardController;
+use App\Http\Controllers\User\WatchlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashboard', 'pin.required')->group(function () {
@@ -150,6 +154,31 @@ Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashbo
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/{reference}', [TransactionController::class, 'show'])->name('show');
         Route::get('/export/csv', [TransactionController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('invest')->name('invest.')->group(function () {
+      // Dashboard/Overview
+    Route::get('/', [InvestmentController::class, 'index'])->name('index');
+    
+    // Stock Marketplace
+    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+    Route::get('/stocks/{stock}', [StockController::class, 'show'])->name('stocks.show');
+    
+    // Buy/Sell Stocks
+    Route::post('/stocks/{stock}/buy', [StockController::class, 'buy'])->name('stocks.buy');
+    Route::post('/stocks/{stock}/sell', [StockController::class, 'sell'])->name('stocks.sell');
+    
+    // Portfolio
+    Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio');
+    
+    // Watchlist
+    Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist');
+    Route::post('/watchlist/{stock}/add', [WatchlistController::class, 'add'])->name('watchlist.add');
+    Route::delete('/watchlist/{stock}/remove', [WatchlistController::class, 'remove'])->name('watchlist.remove');
+    
+    // Transaction History
+    Route::get('/transactions', [InvestmentController::class, 'transactions'])->name('transactions');
+
     });
 });
 

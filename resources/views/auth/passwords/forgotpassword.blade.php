@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Credify Bank - Login</title>
+    <title>Credify Bank - Forgot Password</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,11 +59,11 @@
             </div>
 
             <!-- Title -->
-            <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">Welcome Back</h2>
-            <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Log in to your Credify Bank account</p>
+            <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">Forgot Password?</h2>
+            <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Enter your email so we can send an OTP to reset your password</p>
 
             <!-- Form -->
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('email.submit') }}">
                 @csrf
 
                 <!-- Email -->
@@ -86,72 +86,18 @@
                     @enderror
                 </div>
 
-                <!-- Password -->
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Password
-                    </label>
-                    <div class="relative">
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            autocomplete="current-password"
-                            class="w-full px-4 py-3 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none input-focus pr-12 transition"
-                            placeholder="••••••••"
-                        />
-                        <button
-                            type="button"
-                            id="togglePassword"
-                            class="absolute inset-y-0 right-0 flex items-center pr-3 password-toggle text-gray-500 dark:text-gray-400"
-                        >
-                            <i class="ti ti-eye text-xl" id="eyeIcon"></i>
-                        </button>
-                    </div>
-                    @error('password')
-                        <p class="mt-2 text-sm text-danger">{{ $message }}</p>
-                    @enderror
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Password must be at least 8 characters long.
-                    </p>
-                </div>
+               
 
-                <!-- Remember Me Checkbox -->
-<div class="mb-6 flex items-center">
-    <input
-        type="checkbox"
-        id="remember"
-        name="remember"
-        class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-gray-700 cursor-pointer"
-    />
-    <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
-        Remember me
-    </label>
-</div>
 
                 <!-- Submit Button -->
                 <button
                     type="submit"
                     class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
-                    Login to Dashboard
+                    Send email
                 </button>
 
-                <!-- Links -->
-                <div class="mt-6 text-center space-y-2">
-                    <a href="{{ route('password.reset') }}" class="text-sm text-primary hover:underline">
-                        Forgot your password?
-                    </a>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                        Don't have an account?
-                        <a href="{{ route('register') }}" class="text-primary hover:underline font-medium">
-                            Sign up
-                        </a>
-                    </p>
-                </div>
-            </div>
-
+             
             <!-- Footer -->
             <p class="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
                 © {{ date('Y') }} Credify Bank. All rights reserved.
@@ -161,17 +107,7 @@
 
     <!-- Scripts -->
     <script>
-        // === Password Toggle ===
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const eyeIcon = document.getElementById('eyeIcon');
-
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            eyeIcon.classList.toggle('ti-eye');
-            eyeIcon.classList.toggle('ti-eye-off');
-        });
+       
 
         // === Theme Toggle (Light / Dark) ===
         const themeToggle = document.getElementById('themeToggle');

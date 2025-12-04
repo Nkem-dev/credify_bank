@@ -299,4 +299,117 @@ public function activate(Request $request, User $user)
         return redirect()->back()->with('error', 'Failed to activate account: ' . $e->getMessage());
     }
 }
+
+// delete user's account
+public function destroy(User $user)
+{
+    // Prevent deleting yourself
+    if ($user->id === auth()->id()) {
+        return redirect()->back()->with('error', 'You cannot delete your own account.');
+    }
+
+    // Check if user is already deleted
+    if ($user->trashed()) {
+        return redirect()->back()->with('error', 'User is already deleted.');
+    }
+
+    try {
+        DB::beginTransaction(); //begin task
+
+        // Soft delete the user
+        $user->delete();
+
+
+        DB::commit(); //commit to database
+
+        // return with success message 
+        return redirect()->route('admin.users.index')->with('success', "Successfully deleted {$user->name}'s account. You can restore it from the trash.");
+
+    } catch (Exception $e) { //if it fails
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to delete account: ' . $e->getMessage());
+    }
+}
+
+// view users in trash
+public function trash()
+{
+    // get trashed users , 20 per page
+    $trashedUsers = User::onlyTrashed()
+        ->latest('deleted_at')
+        ->paginate(20);
+
+        // return view with trashed users
+    return view('admin.users.trash', compact('trashedUsers'));
+}
+
+// restore user's account
+public function restore($id)
+{
+    try {
+        DB::beginTransaction(); //begin task
+
+        // Find the soft-deleted user
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Check if user is actually deleted
+        if (!$user->trashed()) {
+            return redirect()->back()->with('error', 'User is not deleted.');
+        }
+
+        $userName = $user->name; //get the user's name
+
+        // Restore the user
+        $user->restore();
+
+        // Reactivate the user account
+        $user->status = 'active';
+        $user->save();
+
+
+        DB::commit(); //commit to database
+
+        // return with success message
+        return redirect()->back()->with('success', "Successfully restored {$userName}'s account.");
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to restore account: ' . $e->getMessage());
+    }
+}
+
+// permanetly delete a user
+public function forceDelete($id)
+{
+    try {
+        DB::beginTransaction(); //begin task
+
+        // Find the soft-deleted user
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Prevent force deleting yourself (even if soft deleted)
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot permanently delete your own account.');
+        }
+
+        // Check if user is actually in trash
+        if (!$user->trashed()) {
+            return redirect()->back()->with('error', 'User must be in trash before permanent deletion.');
+        }
+
+        $userName = $user->name; //get user name
+
+        // Permanently delete the user
+        $user->forceDelete();
+
+        DB::commit(); //commit to database
+
+        // return eith success message
+        return redirect()->route('admin.users.trash')->with('success', "Successfully permanently deleted {$userName}'s account.");
+ 
+    } catch (Exception $e) { //if it fails
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Failed to permanently delete account: ' . $e->getMessage());
+    }
+}
 }

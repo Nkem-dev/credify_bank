@@ -11,7 +11,7 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">Manage all registered users on the platform</p>
             </div>
-            <a href="{{ route('admin.users.trashed') }}"
+            <a href="{{ route('admin.users.trash') }}"
                class="inline-flex items-center gap-2 px-5 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition">
                 <i class="ti ti-trash text-lg"></i>
                 Trashed Users
@@ -85,9 +85,9 @@
             </form>
         </div>
 
-        <!-- Users Table - NO OVERFLOW, PERFECT FIT -->
+        <!-- Users Table  -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto fancy-scrollbar">
                 <table class="w-full min-w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700">
                         <tr>
@@ -133,7 +133,7 @@
                                         @elseif($user->tier === 'tier 2') bg-gradient-to-r from-blue-600 to-cyan-600
                                         @elseif($user->tier === 'tier 1') bg-gradient-to-r from-green-600 to-emerald-600
                                         @else bg-gray-500 @endif">
-                                        {{ ucwords(str_replace('_', ' ', $user->tier ?? 'tier 1')) }}
+                                        {{ ucwords(str_replace('_', ' ', $user->tier ?? 'tier1')) }}
                                     </span>
                                 </td>
 
@@ -212,4 +212,48 @@
         </div>
     </div>
 </main>
+
+<style>
+    /* Fancy Scrollbar */
+    .fancy-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 3px;
+        transition: background 0.3s ease;
+    }
+
+    .fancy-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
+    .dark .fancy-scrollbar {
+        scrollbar-color: #64748b #1f2937;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-thumb {
+        background: #64748b;
+    }
+
+    .dark .fancy-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+</style>
 @endsection

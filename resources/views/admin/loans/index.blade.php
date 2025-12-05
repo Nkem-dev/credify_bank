@@ -139,12 +139,24 @@
                                 </td>
 
                                 <!-- User -->
-                                <td class="px-6 py-4">
+                                {{-- <td class="px-6 py-4">
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $loan->user->name }}</p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $loan->user->email }}</p>
                                     </div>
-                                </td>
+                                </td> --}}
+
+                                <!-- User -->
+<td class="px-6 py-4">
+    <div>
+        <p class="text-sm font-semibold text-gray-900 dark:text-white">
+            {{ $loan->user ? $loan->user->name : 'Deleted User' }}
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ $loan->user ? $loan->user->email : 'N/A' }}
+        </p>
+    </div>
+</td>
 
                                 <!-- Amount -->
                                 <td class="px-6 py-4">

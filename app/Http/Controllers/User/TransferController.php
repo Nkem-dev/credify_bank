@@ -291,7 +291,7 @@ public function airtimeStore(Request $request)
 
     $user = auth()->user();
 
-    // Always accept PIN in fake mode
+    // check if pin is the same with the pin in the database
     if (!Hash::check($request->pin, $user->transaction_pin)) {
         return back()->with('error', 'Incorrect PIN.')->withInput();
     }
@@ -335,7 +335,7 @@ DB::beginTransaction();
         return response()->json([
             'success' => true,
             'message' => 'Airtime purchased!',
-            'receipt_url' => route('user.transfers.receipt', $reference)
+            'receipt_url' => route('user.transfers.airtime.receipt', $reference)
         ]);
 
     } catch (Exception $e) {
@@ -349,159 +349,20 @@ DB::beginTransaction();
     }
 }
 
+public function showAirtimeReceipt($reference)
+{
+    $transfer = Transfer::where('reference', $reference)
+        ->where('user_id', auth()->id())
+        ->where('type', 'airtime')
+        ->firstOrFail();
+
+    return view('user.airtime.receipt', compact('transfer'));
+}
+
 public function dataCreate()
 {
     return view('user.data.data'); 
 }
-
-// public function dataValidate(Request $request)
-// {
-//     $request->validate([
-//         'phone' => [
-//             'required',
-//             'string',
-//             'regex:/^[7-9][0-1]\d{8}$/', // Nigerian format: 10 digits starting with 70, 80, 81, 90, 91
-//         ],
-//         'network' => 'required|in:mtn,airtel,glo,9mobile',
-//         'amount' => 'required|numeric|min:100',
-//     ], [
-//         'phone.regex' => 'Invalid phone number format. Use 10 digits starting with 70, 80, 81, 90, or 91',
-//     ]);
-
-//     $user = auth()->user();
-//     $amount = (float) $request->amount;
-
-//     // Check balance
-//     if ($user->balance < $amount) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Insufficient balance. Your balance is ₦' . number_format($user->balance, 2)
-//         ], 400);
-//     }
-
-//     // Additional phone validation
-//     $phone = $request->phone;
-//     $validPrefixes = ['70', '80', '81', '90', '91'];
-//     $prefix = substr($phone, 0, 2);
-
-//     if (!in_array($prefix, $validPrefixes)) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid phone number. Must start with 70, 80, 81, 90, or 91'
-//         ], 400);
-//     }
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Validation successful'
-//     ]);
-// }
-
-// public function dataStore(Request $request)
-// {
-//     // validate the inputs
-//     $request->validate([
-//         'phone' => [
-//             'required',
-//             'string',
-//             'regex:/^[7-9][0-1]\d{8}$/',
-//         ],
-//         'network' => 'required|in:mtn,airtel,glo,9mobile',
-//         'amount' => 'required|numeric|min:100',
-//         'plan' => 'required|json',
-//         'pin' => 'required|digits:4',
-//     ], [
-//         'phone.regex' => 'Invalid phone number format',
-//     ]);
-
-//     $user = auth()->user(); //get the autheneticated user
-
-//     // pin verification: check if the pin in the input matches the pin in the database
-//     if (!Hash::check($request->pin, $user->transaction_pin)) {
-//         return response()->json([
-//             'success' => false,
-//             'error' => 'Incorrect transaction PIN'
-//         ], 400);
-//     }
-
-//     // Check the user's account balance
-//     $amount = (float) $request->amount; //type cast the amount by converting to an actual number
-//     if ($user->balance < $amount) { //if the user's account balance is less than the amount the user wants to but return error message
-//         return response()->json([
-//             'success' => false,
-//             'error' => 'Insufficient balance. Your balance is ₦' . number_format($user->balance, 2)
-//         ], 400);
-//     }
-
-//     // Decode plan json  to an array
-//     $plan = json_decode($request->plan, true);
-
-//     // if the plan is not a valid plan and the size is not valid, return with an error message
-//     if (!$plan || !isset($plan['size']) || !isset($plan['validity'])) {
-//         return response()->json([
-//             'success' => false,
-//             'error' => 'Invalid plan data'
-//         ], 400);
-//     }
-
-//     // Get the value in the phone number field
-//     $phone = $request->phone; 
-
-//     // Begin task
-//     DB::beginTransaction();
-
-//     try {
-//         // get data reference number
-//         $reference = 'DAT-' . strtoupper(Str::random(12));
-
-//         $transfer = Transfer::create([
-//             'user_id' => $user->id,
-//             'reference' => $reference,
-//             'recipient_phone' => $phone,
-//             'recipient_name' => strtoupper($request->network) . ' Nigeria',
-//             'recipient_bank_name' => strtoupper($request->network),
-//             'type' => 'data',
-//             'amount' => $amount,
-//             'fee' => 0,
-//             'total_amount' => $amount,
-//             'description' => "{$plan['size']} {$plan['validity']} Data Bundle - " . strtoupper($request->network),
-//             'status' => 'successful',
-//             'completed_at' => now(),
-//         ]);
-
-//         // Deduct amount from user
-//         $user->decrement('balance', $amount);
-
-//         DB::commit();
-
-//         Log::info('Data purchase successful', [
-//             'reference' => $reference,
-//             'phone' => $phone,
-//             'network' => $request->network,
-//             'amount' => $amount
-//         ]);
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Data bundle purchased successfully!',
-//             'receipt_url' => route('user.data.receipt', $reference)
-//         ]);
-
-//     } catch (Exception $e) {
-//         DB::rollBack();
-        
-//         Log::error('Data purchase failed', [
-//             'error' => $e->getMessage(),
-//             'user_id' => $user->id,
-//             'phone' => $phone
-//         ]);
-
-//         return response()->json([
-//             'success' => false,
-//             'error' => 'Data purchase failed. Please try again.'
-//         ], 500);
-//     }
-// }
 
 
 public function dataValidate(Request $request)
@@ -662,8 +523,7 @@ public function dataStore(Request $request)
             'user_id' => $user->id
         ]);
 
-        // Generate receipt URL - use url() instead of route() to avoid route not found errors
-        // $receiptUrl = url('/user/data/receipt/' . $reference);
+        
         
         // Alternatively, check if route exists
         try {

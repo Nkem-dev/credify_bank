@@ -99,13 +99,23 @@ class InvestmentController extends Controller
     }
 
     // View all user investments
-    public function allInvestments()
-    {
-        $investments = Investment::with('user')
-            ->paginate(20);
+    // public function allInvestments()
+    // {
+    //     $investments = Investment::with('user')
+    //         ->paginate(20);
+
+            
         
-        return view('admin.investments.all-investments', compact('investments'));
-    }
+    //     return view('admin.investments.all-investments', compact('investments'));
+    // }
+
+    public function allInvestments()
+{
+    $investments = Investment::with(['user.userStocks'])
+        ->paginate(20);
+    
+    return view('admin.investments.all-investments', compact('investments'));
+}
     
     // View specific user investment details
     public function showUserInvestment($userId)
@@ -146,6 +156,7 @@ class InvestmentController extends Controller
         
         return view('admin.investments.all-stocks', compact('stocks'));
     }
+    
     
     // View specific stock details
     public function showStock($stockId)
@@ -346,4 +357,179 @@ class InvestmentController extends Controller
             'transactionVolume'
         ));
     }
+
+    // Export Investments
+public function exportInvestments()
+{
+    $investments = Investment::with('user')->get();
+    
+    $filename = 'investments_' . now()->format('Y-m-d_His') . '.csv';
+    
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => "attachment; filename=\"$filename\"",
+    ];
+    
+    $callback = function() use ($investments) {
+        $file = fopen('php://output', 'w');
+        
+        // Headers
+        fputcsv($file, [
+            'User Name',
+            'Email',
+            'Total Invested',
+            'Current Value',
+            'Profit/Loss',
+            'Profit/Loss %',
+            'Stocks Owned',
+            'Last Updated'
+        ]);
+        
+        // Data
+        foreach ($investments as $investment) {
+            fputcsv($file, [
+                $investment->user->name,
+                $investment->user->email,
+                $investment->total_invested,
+                $investment->current_value,
+                $investment->total_profit_loss,
+                $investment->profit_loss_percentage,
+                $investment->user->userStocks()->count(),
+                $investment->updated_at->format('Y-m-d H:i:s')
+            ]);
+        }
+        
+        fclose($file);
+    };
+    
+    return response()->stream($callback, 200, $headers);
+}
+
+// Export Transactions
+public function exportTransactions()
+{
+    $transactions = StockTransaction::with(['user', 'stock'])->get();
+    
+    $filename = 'transactions_' . now()->format('Y-m-d_His') . '.csv';
+    
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => "attachment; filename=\"$filename\"",
+    ];
+    
+    $callback = function() use ($transactions) {
+        $file = fopen('php://output', 'w');
+        
+        // Headers
+        fputcsv($file, [
+            'Transaction ID',
+            'User Name',
+            'Email',
+            'Stock Symbol',
+            'Stock Name',
+            'Type',
+            'Quantity',
+            'Price Per Share',
+            'Total Amount',
+            'Status',
+            'Date'
+        ]);
+        
+        // Data
+        foreach ($transactions as $transaction) {
+            fputcsv($file, [
+                $transaction->id,
+                $transaction->user->name,
+                $transaction->user->email,
+                $transaction->stock->symbol,
+                $transaction->stock->name,
+                ucfirst($transaction->transaction_type),
+                $transaction->quantity,
+                $transaction->price_per_share,
+                $transaction->total_amount,
+                ucfirst($transaction->status),
+                $transaction->created_at->format('Y-m-d H:i:s')
+            ]);
+        }
+        
+        fclose($file);
+    };
+    
+    return response()->stream($callback, 200, $headers);
+}
+
+// Export Analytics
+public function exportAnalytics()
+{
+    // Investment performance
+    $monthlyData = Investment::select(
+            DB::raw('DATE_FORMAT(updated_at, "%Y-%m") as month'),
+            DB::raw('SUM(total_invested) as invested'),
+            DB::raw('SUM(current_value) as value'),
+            DB::raw('SUM(total_profit_loss) as profit')
+        )
+        ->groupBy('month')
+        ->orderBy('month', 'desc')
+        ->take(12)
+        ->get();
+    
+    // Transaction volume
+    $transactionVolume = StockTransaction::select(
+            DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(total_amount) as volume')
+        )
+        ->where('status', 'completed')
+        ->groupBy('month')
+        ->orderBy('month', 'desc')
+        ->take(12)
+        ->get();
+    
+    $filename = 'analytics_report_' . now()->format('Y-m-d_His') . '.csv';
+    
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => "attachment; filename=\"$filename\"",
+    ];
+    
+    $callback = function() use ($monthlyData, $transactionVolume) {
+        $file = fopen('php://output', 'w');
+        
+        // Investment Performance Section
+        fputcsv($file, ['INVESTMENT PERFORMANCE - LAST 12 MONTHS']);
+        fputcsv($file, ['Month', 'Total Invested', 'Current Value', 'Profit/Loss', 'ROI %']);
+        
+        foreach ($monthlyData as $data) {
+            $roi = $data->invested > 0 ? (($data->profit / $data->invested) * 100) : 0;
+            fputcsv($file, [
+                \Carbon\Carbon::parse($data->month . '-01')->format('M Y'),
+                number_format($data->invested, 2),
+                number_format($data->value, 2),
+                number_format($data->profit, 2),
+                number_format($roi, 2) . '%'
+            ]);
+        }
+        
+        // Empty line
+        fputcsv($file, []);
+        
+        // Transaction Volume Section
+        fputcsv($file, ['TRANSACTION VOLUME - LAST 12 MONTHS']);
+        fputcsv($file, ['Month', 'Transactions', 'Volume', 'Avg Transaction']);
+        
+        foreach ($transactionVolume as $volume) {
+            $avgTransaction = $volume->count > 0 ? $volume->volume / $volume->count : 0;
+            fputcsv($file, [
+                \Carbon\Carbon::parse($volume->month . '-01')->format('M Y'),
+                number_format($volume->count),
+                number_format($volume->volume, 2),
+                number_format($avgTransaction, 2)
+            ]);
+        }
+        
+        fclose($file);
+    };
+    
+    return response()->stream($callback, 200, $headers);
+}
 }

@@ -13,36 +13,26 @@
             </a>
 
             <!-- DESKTOP NAV -->
-            <nav class="hidden md:flex items-center space-x-8">
+            <nav class="hidden md:flex items-center space-x-20">
                 <!-- Online Banking -->
                 <div class="relative group">
                     <button class="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-primary font-medium">
-                        <span>Online Banking</span>
-                        <i class="ti ti-chevron-down text-xs transition-transform group-hover:rotate-180"></i>
+                        <span>Home</span>
+                        {{-- <i class="ti ti-chevron-down text-xs transition-transform group-hover:rotate-180"></i> --}}
                     </button>
-                    <div class="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                    {{-- <div class="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
                         <a href="#" class="block px-4 py-2.5 text-sm hover:bg-primary/5 hover:text-primary">Money Transfer Demo - 1</a>
                         <a href="#" class="block px-4 py-2.5 text-sm hover:bg-primary/5 hover:text-primary">Money Transfer Demo - 2</a>
                         <a href="#" class="block px-4 py-2.5 text-sm text-primary font-medium bg-primary/5 rounded-b-xl">Online Banking Demo</a>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <a href="/about" class="text-gray-700 dark:text-gray-300 hover:text-primary font-medium">About Us</a>
-                <a href="/pricing" class="text-gray-700 dark:text-gray-300 hover:text-primary font-medium">Compare Pricing</a>
+               
 
-                <!-- Blog -->
-                <div class="relative group">
-                    <button class="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-primary font-medium">
-                        <span>Blog</span>
-                        <i class="ti ti-chevron-down text-xs transition-transform group-hover:rotate-180"></i>
-                    </button>
-                    <div class="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
-                        <a href="/blog" class="block px-4 py-2.5 text-sm hover:bg-primary/5 hover:text-primary rounded-t-xl">Blog</a>
-                        <a href="/blog-details" class="block px-4 py-2.5 text-sm hover:bg-primary/5 hover:text-primary rounded-b-xl">Blog Details</a>
-                    </div>
-                </div>
+              
 
-                <a href="/contact" class="text-gray-700 dark:text-gray-300 hover:text-primary font-medium">Contact</a>
+                <a href="/contact" class="text-gray-700 dark:text-gray-300 hover:text-primary font-medium">Contact Us</a>
             </nav>
 
             <!-- RIGHT SIDE -->

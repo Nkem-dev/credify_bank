@@ -38,4 +38,17 @@ class Loan extends Model
         // calculates the amount loaned , interest rate and the months you have to pay back loan
         return $principal * ($r * pow(1 + $r, $months)) / (pow(1 + $r, $months) - 1);
     }
+
+
+    // Helper method to safely get user name
+    public function getUserNameAttribute()
+    {
+        return $this->user ? $this->user->name : 'Deleted User';
+    }
+
+     // Helper method to safely get user email
+    public function getUserEmailAttribute()
+    {
+        return $this->user ? $this->user->email : 'N/A';
+    }
 }

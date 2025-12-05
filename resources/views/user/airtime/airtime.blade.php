@@ -88,36 +88,7 @@
         </form>
     </div>
 
-    <!-- PIN Modal -->
-    {{-- <div id="pinModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Enter Transaction PIN</h3>
-            <form id="pinForm" action="{{ route('user.transfers.airtime.store') }}" method="POST">
-                @csrf
-                <input type="hidden" name="prevalidated" value="1">
-                <input type="hidden" id="hidden_phone" name="phone">
-                <input type="hidden" id="hidden_network" name="network">
-                <input type="hidden" id="hidden_amount" name="amount">
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">4-digit PIN</label>
-                    <input type="password" name="pin" maxlength="4" inputmode="numeric"
-                           class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-center text-2xl tracking-widest"
-                           placeholder="••••" required>
-                </div>
-
-                <div class="flex space-x-3">
-                    <button type="submit" class="flex-1 bg-primary text-white py-3 rounded font-medium hover:bg-primary/90">
-                        Buy Airtime
-                    </button>
-                    <button type="button" id="closePinModal"
-                            class="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-3 rounded font-medium">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div> --}}
+    
 
     <!-- PIN Modal -->
 <div id="pinModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
@@ -147,101 +118,7 @@
 </div>
 </div>
 
-{{-- @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-(function() {
-    'use strict';
 
-    const form = document.getElementById('airtimeForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const pinModal = document.getElementById('pinModal');
-    const pinForm = document.getElementById('pinForm');
-    const networkSelect = document.getElementById('network');
-    const networkIcon = document.getElementById('networkIcon');
-
-    // Network logos 
-    const networkLogos = {
-        mtn: 'https://credify.ng/logos/mtn.png',
-        airtel: 'https://credify.ng/logos/airtel.png',
-        glo: 'https://credify.ng/logos/glo.png',
-        9mobile: 'https://credify.ng/logos/9mobile.png' 
-    };
-
-    // Update icon when network changes
-    networkSelect.addEventListener('change', function() {
-        const selected = this.value;
-        networkIcon.src = networkLogos[selected] || networkLogos.mtn;
-    });
-
-    // Submit → Validate → Show PIN
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const phone = document.getElementById('phone').value.trim();
-        const network = networkSelect.value;
-        const amount = parseFloat(document.getElementById('amount').value);
-
-        // if (!/^0[789][01]\d{8}$/.test(phone)) {
-        //     return showAlert('Enter a valid Nigerian phone number (e.g., 08012345678)', 'error');
-        // }
-        if (amount < 50) {
-            return showAlert('Minimum airtime is ₦50', 'error');
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Validating...';
-
-        try {
-            const res = await axios.post('{{ route("user.transfers.airtime.validate") }}', {
-                phone, network, amount
-            }, {
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            });
-
-            if (res.data.success) {
-                document.getElementById('hidden_phone').value = phone;
-                document.getElementById('hidden_network').value = network;
-                document.getElementById('hidden_amount').value = amount;
-
-                pinModal.classList.remove('hidden');
-                pinModal.classList.add('flex');
-                pinForm.querySelector('input[name="pin"]').focus();
-            } else {
-                showAlert(res.data.message, 'error');
-            }
-        } catch (err) {
-            showAlert(err.response?.data?.message || 'Validation failed', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Continue to PIN';
-        }
-    });
-
-    // Close modal
-    document.getElementById('closePinModal').addEventListener('click', () => {
-        pinModal.classList.add('hidden');
-        pinModal.classList.remove('flex');
-    });
-
-    pinModal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-            this.classList.remove('flex');
-        }
-    });
-
-    function showAlert(msg, type = 'info') {
-        const colors = { success: 'bg-green-600', error: 'bg-red-600' };
-        const alert = document.createElement('div');
-        alert.className = `fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity`;
-        alert.innerHTML = `<i class="ti ti-x mr-2"></i>${msg}`;
-        document.body.appendChild(alert);
-        setTimeout(() => alert.remove(), 3000);
-    }
-})();
-</script>
-@endpush --}}
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

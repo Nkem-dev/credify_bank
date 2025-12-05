@@ -71,9 +71,9 @@
             </div>
 
             <!-- New Balance -->
-            <div class="mt-6 p-4 bg-gradient-to-r from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-lg">
+            <div class="mt-6 p-4 bg-primary dark:from-primary/20 rounded-lg">
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">New Account Balance</p>
-                <p class="text-3xl font-bold text-primary font-mono">
+                <p class="text-3xl font-bold text-gray-600 dark:text-gray-300  font-mono">
                     ₦{{ number_format(Auth::user()->balance, 2) }}
                 </p>
             </div>

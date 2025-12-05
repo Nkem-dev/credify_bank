@@ -79,4 +79,6 @@ class Investment extends Model
             ]
         );
     }
+
+    
 }

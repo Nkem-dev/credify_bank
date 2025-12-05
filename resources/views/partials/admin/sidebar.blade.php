@@ -32,13 +32,13 @@
         </a>
 
         <!-- Accounts -->
-        <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+        {{-- <a href="#" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary
                {{ request()->is('admin/accounts*') ? 'sidebar-active bg-primary text-white hover:bg-primary/90' : 'text-gray-700 dark:text-gray-300' }}">
             <i class="ti ti-credit-card text-lg transition-colors group-hover:text-primary dark:group-hover:text-primary
                    {{ request()->is('admin/accounts*') ? 'text-white' : '' }}"></i>
             <span>Accounts</span>
-        </a>
+        </a> --}}
 
         <!-- Transactions -->
         <a href="{{ route('admin.transactions.index') }}" class="group sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200

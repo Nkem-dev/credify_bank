@@ -80,6 +80,9 @@ Route::prefix('user')->name('user.')->middleware('auth', 'can:access-user-dashbo
      Route::get('/airtime', [TransferController::class, 'airtimeCreate'])->name('airtime.create');
     Route::post('/airtime/validate', [TransferController::class, 'airtimeValidate'])->name('airtime.validate');
     Route::post('/airtime', [TransferController::class, 'airtimeStore'])->name('airtime.store');
+    // In your web.php or user routes file
+Route::get('/airtime/receipt/{reference}', [TransferController::class, 'showAirtimeReceipt'])
+    ->name('airtime.receipt');
 
     // route for data
     Route::get('/data', [TransferController::class, 'dataCreate'])

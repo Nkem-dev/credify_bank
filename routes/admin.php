@@ -89,9 +89,22 @@ Route::prefix('virtual-cards')->name('virtual-cards.')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('index');
         Route::get('/analytics', [InvestmentController::class, 'analytics'])->name('analytics');
         
+         Route::get('export', [InvestmentController::class, 'export'])
+            ->name('export');
+           
         // User Investments
         Route::get('/all', [InvestmentController::class, 'allInvestments'])->name('all');
         Route::get('/user/{userId}', [InvestmentController::class, 'showUserInvestment'])->name('user.show');
+
+        // Route::get('/user-details/{user}', [InvestmentController::class, 'userDetails'])
+        //     ->name('user-details');
+         Route::get('/user/{userId}', [InvestmentController::class, 'showUserInvestment'])->name('user-details');
+
+            
+
+
+             
+          
         
         // Stocks Management
         Route::prefix('stocks')->name('stocks.')->group(function () {
@@ -108,6 +121,8 @@ Route::prefix('virtual-cards')->name('virtual-cards.')->group(function () {
         Route::prefix('transactions')->name('transactions.')->group(function () {
             Route::get('/', [InvestmentController::class, 'allTransactions'])->name('all');
             Route::put('/{transaction}/status', [InvestmentController::class, 'updateTransactionStatus'])->name('update-status');
+
+              Route::get('/export', [InvestmentController::class, 'exportTransactions'])->name('export');
         });
         
         // User Stocks (Portfolios)
@@ -115,5 +130,14 @@ Route::prefix('virtual-cards')->name('virtual-cards.')->group(function () {
         
         // Watchlists
         Route::get('/watchlists', [InvestmentController::class, 'allWatchlists'])->name('watchlists.all');
+
+        
+        
+           
+
+             Route::get('export', [InvestmentController::class, 'export'])
+            ->name('analytics.export');
+
     });
 });
+

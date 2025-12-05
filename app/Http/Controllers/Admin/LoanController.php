@@ -18,51 +18,111 @@ class LoanController extends Controller
     /**
      * Display list of all loans
      */
+    // public function index(Request $request)
+    // {
+    //     // Statistics
+    //     // total approved loans
+    //     $totalLoans = Loan::where('status', 'approved')->sum('amount');
+    //     $pendingLoans = Loan::where('status', 'pending')->count(); //pending loans
+    //     $activeLoans = Loan::where('status', 'approved')->count(); //active loans
+    //     $overdueLoans = Loan::where('status', 'approved') //loan is approved
+    //         ->whereNotNull('disbursed_at') //the loan is not null meaning it was actually disbursed
+    //         ->whereRaw('DATE_ADD(disbursed_at, INTERVAL term_months MONTH) < NOW()')
+    //         ->count(); //if the disbursed date and the term of repayment is less than today(overdue losn)
+
+    //     // Build query:eager load the user and the loan
+    //     $query = Loan::with('user');
+
+    //     // Filter by status
+    //     if ($request->filled('status')) {
+    //         $query->where('status', $request->status);
+    //     }
+
+    //     // Search by user name and email
+    //     if ($request->filled('search')) {
+    //         $search = $request->search;
+    //         $query->whereHas('user', function($q) use ($search) {
+    //             $q->where('name', 'like', "%{$search}%")
+    //               ->orWhere('email', 'like', "%{$search}%");
+    //         });
+    //     }
+
+    //     // Sort by descending order
+    //     $sortBy = $request->get('sort_by', 'created_at');
+    //     $sortOrder = $request->get('sort_order', 'desc');
+    //     $query->orderBy($sortBy, $sortOrder);
+
+    //     $loans = $query->paginate(20); //show 20 per page
+
+    //     // return view with loan details
+    //     return view('admin.loans.index', compact(
+    //         'loans',
+    //         'totalLoans',
+    //         'pendingLoans',
+    //         'activeLoans',
+    //         'overdueLoans'
+    //     ));
+    // }
+
     public function index(Request $request)
-    {
-        // Statistics
-        // total approved loans
-        $totalLoans = Loan::where('status', 'approved')->sum('amount');
-        $pendingLoans = Loan::where('status', 'pending')->count(); //pending loans
-        $activeLoans = Loan::where('status', 'approved')->count(); //active loans
-        $overdueLoans = Loan::where('status', 'approved') //loan is approved
-            ->whereNotNull('disbursed_at') //the loan is not null meaning it was actually disbursed
-            ->whereRaw('DATE_ADD(disbursed_at, INTERVAL term_months MONTH) < NOW()')
-            ->count(); //if the disbursed date and the term of repayment is less than today(overdue losn)
+{
+    // Statistics
+    $totalLoans = Loan::where('status', 'approved')
+        ->whereHas('user') // Only count loans with valid users
+        ->sum('amount');
+        
+    $pendingLoans = Loan::where('status', 'pending')
+        ->whereHas('user')
+        ->count();
+        
+    $activeLoans = Loan::where('status', 'approved')
+        ->whereHas('user')
+        ->count();
+        
+    $overdueLoans = Loan::where('status', 'approved')
+        ->whereNotNull('disbursed_at')
+        ->whereHas('user')
+        ->whereRaw('DATE_ADD(disbursed_at, INTERVAL term_months MONTH) < NOW()')
+        ->count();
 
-        // Build query:eager load the user and the loan
-        $query = Loan::with('user');
+    // Build query: eager load the user and the loan
+    $query = Loan::with('user')
+        ->whereHas('user'); // Only get loans with valid users
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Search by user name and email
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        // Sort by descending order
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $loans = $query->paginate(20); //show 20 per page
-
-        // return view with loan details
-        return view('admin.loans.index', compact(
-            'loans',
-            'totalLoans',
-            'pendingLoans',
-            'activeLoans',
-            'overdueLoans'
-        ));
+    // Filter by status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
     }
+
+    // Filter by payment status
+    if ($request->filled('payment_status')) {
+        $query->where('payment_status', $request->payment_status);
+    }
+
+    // Search by user name and email
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->whereHas('user', function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+        });
+    }
+
+    // Sort by descending order
+    $sortBy = $request->get('sort_by', 'created_at');
+    $sortOrder = $request->get('sort_order', 'desc');
+    $query->orderBy($sortBy, $sortOrder);
+
+    $loans = $query->paginate(20);
+
+    return view('admin.loans.index', compact(
+        'loans',
+        'totalLoans',
+        'pendingLoans',
+        'activeLoans',
+        'overdueLoans'
+    ));
+}
 
     /**
      * Show loan details

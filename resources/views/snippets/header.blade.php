@@ -38,7 +38,8 @@
             <!-- RIGHT SIDE -->
             <div class="flex items-center space-x-4">
                 <div class="hidden md:flex items-center space-x-3">
-                    <a href="{{ route('login') }}" class="px-4 py-2 text-primary font-medium rounded-lg hover:bg-primary/10 transition">Log In</a>
+                    {{-- <a href="{{ route('login') }}" class="px-4 py-2 text-primary font-medium rounded-lg hover:bg-primary/10 transition">Log In</a> --}}
+                     <a href="{{ route('login') }}" class="px-5 py-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition">Login</a>
                     <a href="{{ route('register') }}" class="px-5 py-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition">Register Now</a>
                 </div>
 

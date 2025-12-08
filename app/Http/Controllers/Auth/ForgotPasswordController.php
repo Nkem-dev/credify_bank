@@ -15,132 +15,170 @@ use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
 {
-    // show the view of the email form
-     public function showEmailForm() 
+    // Show the email form
+    public function showEmailForm() 
     {
         return view('auth.passwords.forgotpassword');
     }
 
-    // submit email form
-     public function submitEmail(Request $request) {
-        // validate input
+    // Submit email form
+    public function submitEmail(Request $request) 
+    {
+        // Validate input
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.exists' => 'We could not find a user with this email address.',
         ]);
 
-        try{
-
-           
+        try {
             DB::beginTransaction(); //begin task
 
-            // get the first user that the email matches  the email requesting to reset password in the database
-            $user = User::where('email', $request->email)->first(); 
+            // Get the user that the email is a match with the one in the request
+            $user = User::where('email', $request->email)->first();
 
-            //  dd($user);
-            // if there is no email that match in the database
-        if(!$user) {
-            return redirect()->back()->withErrors(['email'=> 'We could not find a user with this email address']);
-        }
+            // if the user does not exist return with error message
+            if (!$user) {
+                return redirect()->back()->withErrors(['email' => 'We could not find a user with this email address']);
+            }
 
-        $resetToken = Str::random(40); //generate token
-        $otp = rand(100000, 999999); //generate otp
+            // Generate token and OTP
+            $resetToken = Str::random(40);
+            $otp = rand(100000, 999999);
 
-        $user->password_reset_token = $resetToken;
-        $user->password_reset_otp = $otp;
-        $user->password_reset_token_expires_at = now()->addMinutes(20);
+            // Update user with reset data
+            $user->password_reset_token = $resetToken;
+            $user->password_reset_otp = $otp;
+            $user->password_reset_token_expires_at = now()->addMinutes(20);
+            $user->save();
 
-         $user->save();
+            // Send email
+            Mail::to($user->email)->send(new PasswordResetOtpMail($otp, $user));
 
-        Mail::to($user->email)->send(new PasswordResetOtpMail($otp));
-        DB::commit();
+            //  dd('Email sent');
+            DB::commit(); //commit to database
 
-       
+           
+            return redirect()->route('password.confirm.code', ['token' => $resetToken])
+                ->with('success', 'We have sent an OTP to your email to reset your password');
 
-        return redirect()->route('confirm.code', ['token' => $resetToken])->with('success', 'We have sent an OTP to your email to reset your password');
-
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
-            Log::error('Forget password error: ' . $e->getMessage(), [
+            dd($e->getMessage());
+            Log::error('Forgot password error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'email' => $request->email,
             ]);
-            return redirect()->back()->with('error', 'Something went wrong, please try again later');
+            return redirect()->back()->with('error', 'Something went wrong. Please try again later.');
         }
-        
     }
 
+    // Show OTP confirmation form
     public function showConfirmationCode($token)
     {
+        $user = User::where('password_reset_token', $token)
+            ->where('password_reset_token_expires_at', '>', now())
+            ->first();
 
-         $user = User::where('password_reset_token', $token)->where('password_reset_token_expires_at', '>', now())->first();
+        if (!$user) {
+            return redirect()->route('password.request')
+                ->with('error', 'Invalid or expired token. Please request a new password reset.');
+        }
 
-
-         if(!$user) {
-            return redirect()->back()->with('error', 'Invalid or expired token');
-         }
-
-         $maskedEmail = $this->maskEmail($user->email);
+        $maskedEmail = $this->maskEmail($user->email);
+        $expiresAtUnix = $user->password_reset_token_expires_at->timestamp * 1000;
 
         return view('auth.passwords.confirm-code', [
-           
             'token' => $token, 
             'email' => $maskedEmail,
-            'expiredAt' => $user->password_reset_token_expires_at
+            'otp_expires_at_unix' => $expiresAtUnix
         ]);
-          
-
     }
 
+    // Verify OTP
     public function verifyPasswordOtp(Request $request, $token)
     {
-       try{
-
-        $request->validate([
-                'token' => 'required',
+        try {
+            $request->validate([
                 'otp' => 'required|numeric|digits:6'
             ], [
                 'otp.required' => 'Please enter the verification code',
+                'otp.digits' => 'Verification code must be 6 digits',
             ]);
 
-            $user = User::where('password_reset_token', $token)->where('password_reset_token_expires_at', '>', now())->first();
+            $user = User::where('password_reset_token', $token)
+                ->where('password_reset_token_expires_at', '>', now())
+                ->first();
 
-            if(!$user) {
-                return redirect()->back()->with('error', 'Invalid or Expired token');
+            if (!$user) {
+                return redirect()->back()->with('error', 'Invalid or expired token.');
             }
 
-            if($user->password_reset_otp !== $request->otp){
-                return redirect()->back()->with('error', 'Invalid OTP, please try again');
-            }
+         
 
+            // OTP is valid, proceed to password reset form
+            return redirect()->route('password.reset.form', ['token' => $token])
+                ->with('success', 'OTP verified successfully. Please enter your new password.');
 
-            return redirect()->route('password.reset.form', ['token' => $token]);
-       } catch(Exception $e){
-
-        dd($e->getMessage());
-        return redirect()->back()->with('error', $e->getMessage());
-
-       }
-        
+        } catch (Exception $e) {
+              
+            Log::error('OTP verification error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred. Please try again.');
+        }
     }
 
+    // Resend OTP
+    public function resendOtp(Request $request, $token)
+    {
+        try {
+            $user = User::where('password_reset_token', $token)->first();
+
+            if (!$user) {
+                return redirect()->route('password.request')
+                    ->with('error', 'Invalid token. Please start the password reset process again.');
+            }
+
+            // Generate new OTP and extend expiration
+            $otp = rand(100000, 999999);
+            $user->password_reset_otp = $otp;
+            $user->password_reset_token_expires_at = now()->addMinutes(20);
+            $user->save();
+
+            // Send new OTP email
+            Mail::to($user->email)->send(new PasswordResetOtpMail($otp, $user));
+
+            return redirect()->back()->with('success', 'A new OTP has been sent to your email.');
+
+        } catch (Exception $e) {
+            Log::error('Resend OTP error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to resend OTP. Please try again.');
+        }
+    }
+
+    // Show reset password form
     public function showResetPasswordForm($token)
     {
+        $user = User::where('password_reset_token', $token)
+            ->where('password_reset_token_expires_at', '>', now())
+            ->first();
 
-        $user = User::where('password_reset_token', $token)->where('password_reset_token_expires_at', '>', now())->first();
-
-        // dd($user);
-        if(!$user) {
-            return redirect()->back()->with('error', 'Invalid or Expired token');
+        if (!$user) {
+            return redirect()->route('password.request')
+                ->with('error', 'Invalid or expired token. Please request a new password reset.');
         }
 
         return view('auth.passwords.reset-password', ['token' => $token]);
     }
 
-    // In the controller
+    // Submit new password
     public function submitResetPassword(Request $request, $token)
     {
         $request->validate([
             'password' => 'required|min:8|max:40|confirmed',
+        ], [
+            'password.required' => 'Please enter a new password',
+            'password.min' => 'Password must be at least 8 characters',
+            'password.confirmed' => 'Password confirmation does not match',
         ]);
 
         $user = User::where('password_reset_token', $token)
@@ -148,11 +186,11 @@ class ForgotPasswordController extends Controller
             ->first();
 
         if (!$user) {
-            return redirect()->back()->with('error', 'Invalid or expired password reset token.');
+            return redirect()->route('password.request')
+                ->with('error', 'Invalid or expired password reset token.');
         }
 
         try {
-            // Using DB::transaction with a closure
             DB::transaction(function () use ($user, $request) {
                 $user->password = Hash::make($request->password);
                 $user->password_reset_token = null;
@@ -161,33 +199,31 @@ class ForgotPasswordController extends Controller
                 $user->save();
             });
 
-            return redirect()->route('login')->with('success', 'Password successfully reset. You can now login with your new password.');
+            return redirect()->route('login')
+                ->with('success', 'Password successfully reset. You can now login with your new password.');
+
         } catch (Exception $e) {
-       
-            return redirect()->back()->with('error', 'An error occurred while resetting your password. Please try again.' . $e->getMessage());
+            Log::error('Password reset error: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'An error occurred while resetting your password. Please try again.');
         }
     }
 
+    // Helper function to mask email
     private function maskEmail($email)
     {
-    // validates whether it is an email or not
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { //checks if the email is a valid email address if it is invalid the ! turns the condition true and makes sure the function does not process anything that is not a valid email
-        return $email; //if $email is not an email return email without masking but if it is a email return email with masking
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $email;
+        }
+
+        list($localPart, $domain) = explode('@', $email);
+        $localLength = strlen($localPart);
+
+        if ($localLength <= 2) {
+            return '***@' . $domain;
+        }
+
+        $maskedLocal = $localPart[0] . str_repeat('*', $localLength - 2) . $localPart[$localLength - 1];
+        return $maskedLocal . '@' . $domain;
     }
-
-    // split the email into parts. the email consists of the local part (the part before the @ i.e johndoe) and the domain part (the part after the @ i.e @gmail.com)
-    list($localPart, $domain) = explode('@', $email); //explode splits the email at the @ symbol into an array ['johndoe', 'gmail.com']. 
-    // list assigns the first part ['johndoe'] to the local part and the ['gmail.com'] to the domain part
-    $localLength = strlen($localPart); //gets the length of the local part
-
-    if ($localLength <= 2) { //if the local part is less than equals to 2 that is in a case where the local part of the email is short , it wont try to mask it in a fancy way but would i.e ab@gmail.com
-        return '***@' . $domain; //the short email will returns with aestherics then @gmail.com (domain). **@gmail.com
-    }
-
-    // mask the local part
-    $maskedLocal = $localPart[0] . str_repeat('*', $localLength - 2) . $localPart[$localLength - 1]; //localpart[0] takes the first letter of the local part, str_repeat('*', localLength - 2) creates a string of aestherics and replaces all characters except first and last. 
-    return $maskedLocal . '@' . $domain;
-
-    }
-
 }

@@ -11,16 +11,18 @@ use Illuminate\Queue\SerializesModels;
 
 class PasswordResetOtpMail extends Mailable
 {
-    public $otp;
     use Queueable, SerializesModels;
+
+    public $otp;
+    public $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($otp)
+    public function __construct($otp, $user)
     {
-        
-         $this->otp = $otp;
+        $this->otp = $otp;
+        $this->user = $user;
     }
 
     /**
@@ -29,7 +31,7 @@ class PasswordResetOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Password Reset Otp Mail',
+            subject: 'Credify Bank - Password Reset OTP',
         );
     }
 
@@ -42,6 +44,7 @@ class PasswordResetOtpMail extends Mailable
             view: 'emails.password_reset_mail',
             with: [
                 'otp_code' => $this->otp,
+                'user' => $this->user,
             ],
         );
     }

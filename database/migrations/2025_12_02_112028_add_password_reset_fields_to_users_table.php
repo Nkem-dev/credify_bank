@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('password_reset_token', 100)->nullable();
             $table->string('password_reset_otp')->nullable();
-            $table->string('password_reset_token_expires_at')->nullable();
+            $table->timestamp('password_reset_token_expires_at')->nullable();
         
         });
     }

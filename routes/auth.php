@@ -35,21 +35,48 @@ Route::middleware('redirect.if.authenticated')->group(function () {
     
     // forgot password route
     Route::controller(ForgotPasswordController::class)->group(function () {
-        Route::get('forgot-password', 'showEmailForm')->name('password.reset'); //return the form
-        Route::post('/forgot-password', 'submitEmail')->name('email.submit');  //submit form
+        // Route::get('forgot-password', 'showEmailForm')->name('password.reset'); //return the form
+        // Route::post('/forgot-password', 'submitEmail')->name('email.submit');  //submit form
 
-        // route to show otp form
-        Route::get('confirm-code/{token}', 'showConfirmationCode')->name('confirm.code');
+        // // route to show otp form
+        // Route::get('confirm-code/{token}', 'showConfirmationCode')->name('confirm.code');
 
-        // route to submit otp
-         Route::post('/verify-password-otp/{token}', 'verifyPasswordOtp')->name('user.verify-password-otp');
+        // // route to submit otp
+        //  Route::post('/verify-password-otp/{token}', 'verifyPasswordOtp')->name('user.verify-password-otp');
          
-        //  redirect to return reset password view
-        Route::get('/reset-password{token}', 'showResetPasswordForm' )->name('password.reset.form');
+        // //  redirect to return reset password view
+        // Route::get('/reset-password{token}', 'showResetPasswordForm' )->name('password.reset.form');
 
-        // submit new password
-        Route::post('/reset-password/{token}', 'submitResetPassword')->name('reset.password.submit');
+        // // submit new password
+        // Route::post('/reset-password/{token}', 'submitResetPassword')->name('reset.password.submit');
 
+        // Show email form
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showEmailForm'])
+        ->name('password.request');
+    
+    // Submit email
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'submitEmail'])
+        ->name('password.email.submit');
+    
+    // Show OTP confirmation form
+    Route::get('/password/confirm-code/{token}', [ForgotPasswordController::class, 'showConfirmationCode'])
+        ->name('password.confirm.code');
+    
+    // Verify OTP
+    Route::post('/password/verify-otp/{token}', [ForgotPasswordController::class, 'verifyPasswordOtp'])
+        ->name('password.verify.otp');
+    
+    // Resend OTP
+    Route::post('/password/resend-otp/{token}', [ForgotPasswordController::class, 'resendOtp'])
+        ->name('password.otp.resend');
+    
+    // Show reset password form
+    Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetPasswordForm'])
+        ->name('password.reset.form');
+    
+    // Submit new password
+    Route::post('/password/reset/{token}', [ForgotPasswordController::class, 'submitResetPassword'])
+        ->name('password.update');
     });
    
 

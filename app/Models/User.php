@@ -37,6 +37,9 @@ class User extends Authenticatable
         'transaction_pin',         // hashed 4-digit PIN
         'pin_set_at',
         'last_login_at',
+        'password_reset_token',
+        'password_reset_otp',
+        'password_reset_token_expires_at',
         
     ];
 
@@ -65,6 +68,7 @@ class User extends Authenticatable
             'dob' => 'datetime',
             'otp_expires_at' => 'datetime',
             'pin_set_at' => 'datetime',
+            'password_reset_token_expires_at' => 'datetime',
         ];
     }
 

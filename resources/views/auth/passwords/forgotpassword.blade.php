@@ -26,26 +26,20 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" />
 
     <style>
         body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
         .input-focus:focus {
             @apply ring-2 ring-primary/20 border-primary;
         }
-        .password-toggle {
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .password-toggle:hover { @apply text-primary; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors">
 
-    <!-- Login Card -->
     <div class="w-full max-w-md relative">
-        <!-- Theme Toggle (Top Right) -->
-        <button id="themeToggle" class="absolute top-4 right-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="absolute top-4 right-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition z-10">
             <i class="ti ti-sun text-lg inline dark:hidden"></i>
             <i class="ti ti-moon text-lg hidden dark:inline"></i>
         </button>
@@ -60,44 +54,57 @@
 
             <!-- Title -->
             <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">Forgot Password?</h2>
-            <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Enter your email so we can send an OTP to reset your password</p>
+            <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Enter your email address and we'll send you an OTP to reset your password</p>
 
             <!-- Form -->
-            <form method="POST" action="{{ route('email.submit') }}">
+            <form method="POST" action="{{ route('password.email.submit') }}" id="forgotPasswordForm">
                 @csrf
 
                 <!-- Email -->
                 <div class="mb-6">
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Email Address
+                        Email Address <span class="text-danger">*</span>
                     </label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        required
-                        autocomplete="email"
-                        class="w-full px-4 py-3 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none input-focus transition"
-                       
-                    />
+                    <div class="relative">
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            required
+                            autocomplete="email"
+                            placeholder="Enter your email"
+                            class="w-full px-4 py-3 pl-11 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none input-focus transition"
+                        />
+                        <i class="ti ti-mail absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></i>
+                    </div>
                     @error('email')
-                        <p class="mt-2 text-sm text-danger">{{ $message }}</p>
+                        <p class="mt-2 text-sm text-danger flex items-center space-x-1">
+                            <i class="ti ti-alert-circle"></i>
+                            <span>{{ $message }}</span>
+                        </p>
                     @enderror
                 </div>
-
-               
-
 
                 <!-- Submit Button -->
                 <button
                     type="submit"
-                    class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    id="submitBtn"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center space-x-2"
                 >
-                    Send email
+                    <span>Send OTP</span>
+                    <i class="ti ti-send"></i>
                 </button>
+            </form>
 
-             
+            <!-- Back to Login -->
+            <div class="mt-6 text-center">
+                <a href="{{ route('login') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary font-medium inline-flex items-center space-x-1">
+                    <i class="ti ti-arrow-left"></i>
+                    <span>Back to Login</span>
+                </a>
+            </div>
+
             <!-- Footer -->
             <p class="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
                 © {{ date('Y') }} Credify Bank. All rights reserved.
@@ -107,20 +114,16 @@
 
     <!-- Scripts -->
     <script>
-       
-
-        // === Theme Toggle (Light / Dark) ===
+        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
 
-        // Load saved theme or system preference
         if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             html.classList.add('dark');
         } else {
             html.classList.remove('dark');
         }
 
-        // Toggle on click
         themeToggle.addEventListener('click', () => {
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
@@ -131,14 +134,22 @@
             }
         });
 
-        // Optional: Fade out error messages after 5s
-        setTimeout(() => {
-            document.querySelectorAll('.text-danger').forEach(el => {
-                el.style.transition = 'opacity 0.5s';
-                el.style.opacity = '0';
-            });
-        }, 5000);
+        // Form submission loading state
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        forgotPasswordForm.addEventListener('submit', () => {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Sending...</span>
+            `;
+        });
     </script>
+
     <!-- iziToast JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
 
@@ -153,7 +164,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -165,7 +175,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -177,7 +186,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -189,7 +197,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });

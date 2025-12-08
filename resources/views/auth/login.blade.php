@@ -140,7 +140,7 @@
 
                 <!-- Links -->
                 <div class="mt-6 text-center space-y-2">
-                    <a href="{{ route('password.reset') }}" class="text-sm text-primary hover:underline">
+                    <a href="{{ route('password.request') }}" class="text-sm text-primary hover:underline">
                         Forgot your password?
                     </a>
                     <p class="text-sm text-gray-600 dark:text-gray-400">

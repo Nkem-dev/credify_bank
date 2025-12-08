@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Credify Bank - Verify Email</title>
+    <title>Credify Bank - Verify OTP</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,14 +33,10 @@
         .input-focus:focus {
             @apply ring-2 ring-primary/20 border-primary;
         }
-        .input-error {
-            @apply border-danger ring-2 ring-danger/20;
-        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors">
 
-    <!-- OTP Card -->
     <div class="w-full max-w-lg relative">
         <!-- Theme Toggle -->
         <button id="themeToggle" class="absolute top-4 right-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition z-10">
@@ -62,39 +58,10 @@
                 We sent a 6-digit code to <span class="font-medium text-primary">{{ $email }}</span>
             </p>
 
-            <!-- Flash Messages -->
-            {{-- @if(session('success'))
-                <div class="mb-6 p-4 bg-accent/10 border border-accent rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-circle-check text-accent text-xl mt-0.5"></i>
-                    <p class="text-sm text-accent font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="mb-6 p-4 bg-danger/10 border border-danger rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-alert-circle text-danger text-xl mt-0.5"></i>
-                    <p class="text-sm text-danger font-medium">{{ session('error') }}</p>
-                </div>
-            @endif
-
-            @if(session('info'))
-                <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-info-circle text-blue-600 dark:text-blue-400 text-xl mt-0.5"></i>
-                    <p class="text-sm text-blue-700 dark:text-blue-300 font-medium">{{ session('info') }}</p>
-                </div>
-            @endif
-
-            @if(session('warning'))
-                <div class="mb-6 p-4 bg-warning/10 border border-warning rounded-lg flex items-start space-x-3">
-                    <i class="ti ti-alert-triangle text-warning text-xl mt-0.5"></i>
-                    <p class="text-sm text-warning font-medium">{{ session('warning') }}</p>
-                </div>
-            @endif --}}
-
             <!-- OTP Form -->
-            <form action="{{ route('user.verify-password-otp', $token) }}" method="POST" id="otpForm">
+            <form action="{{ route('password.verify.otp', $token) }}" method="POST" id="otpForm">
                 @csrf
-                <input type="hidden" name="token" value="{{ $token }}" id="tokenInput">
+                <input type="hidden" name="token" value="{{ $token }}">
 
                 <!-- OTP Input -->
                 <div class="mb-6">
@@ -110,8 +77,8 @@
                         inputmode="numeric"
                         pattern="[0-9]{6}"
                         autocomplete="one-time-code"
-                        class="w-full px-4 py-3 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none input-focus text-center text-2xl tracking-widest font-mono transition"
                         placeholder="------"
+                        class="w-full px-4 py-3 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none input-focus text-center text-2xl tracking-widest font-mono transition"
                     />
                     @error('otp')
                         <p class="mt-2 text-sm text-danger flex items-center space-x-1">
@@ -132,7 +99,7 @@
                     id="submitBtn"
                     class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center space-x-2"
                 >
-                    <span>Verify Email</span>
+                    <span>Verify OTP</span>
                     <i class="ti ti-arrow-right"></i>
                 </button>
             </form>
@@ -141,9 +108,9 @@
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     Didn't receive the code?
-                    <form action="{{ route('user.otp-resend', $token) }}" method="POST" id="resendOtpForm" class="inline">
+                    <form action="{{ route('password.otp.resend', $token) }}" method="POST" id="resendOtpForm" class="inline">
                         @csrf
-                        <input type="hidden" name="token" value="{{ $token }}" id="resendTokenInput">
+                        <input type="hidden" name="token" value="{{ $token }}">
                         <button
                             type="submit"
                             id="resendBtn"
@@ -158,21 +125,24 @@
 
             <!-- Back to Login -->
             <div class="mt-6 text-center">
-                <a href="{{ route('login') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary font-medium">
-                    Back to Login
+                <a href="{{ route('login') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary font-medium inline-flex items-center space-x-1">
+                    <i class="ti ti-arrow-left"></i>
+                    <span>Back to Login</span>
                 </a>
             </div>
 
-            <!-- Footer -->
+            
+        </div>
+        <!-- Footer -->
             <p class="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
                 © {{ date('Y') }} Credify Bank. All rights reserved.
             </p>
-        </div>
     </div>
+    
 
     <!-- Scripts -->
     <script>
-        // === Theme Toggle ===
+        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
 
@@ -185,7 +155,7 @@
             localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
         });
 
-        // === OTP Timer (Server-synced expiry) ===
+        // OTP Timer
         const timerElement = document.getElementById('timer');
         const resendBtn = document.getElementById('resendBtn');
         const otpExpiresAt = {{ $otp_expires_at_unix ?? now()->addMinutes(20)->timestamp * 1000 }};
@@ -196,6 +166,8 @@
 
             if (timeLeft <= 0) {
                 timerElement.textContent = "00:00";
+                timerElement.classList.add('text-danger');
+                timerElement.classList.remove('text-primary');
                 resendBtn.disabled = false;
                 resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 return;
@@ -218,9 +190,9 @@
             clearInterval(interval);
             resendBtn.disabled = false;
             resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }, otpExpiresAt - Date.now() + 1000);
+        }, Math.max(0, otpExpiresAt - Date.now() + 1000));
 
-        // === Form Submission Loading State ===
+        // Form submission loading state
         const otpForm = document.getElementById('otpForm');
         const submitBtn = document.getElementById('submitBtn');
 
@@ -234,6 +206,9 @@
                 <span>Verifying...</span>
             `;
         });
+
+        // Auto-focus OTP input
+        document.getElementById('otp')?.focus();
     </script>
 
     <!-- iziToast JS -->
@@ -250,7 +225,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -262,7 +236,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -274,7 +247,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });
@@ -286,7 +258,6 @@
                     timeout: 5000,
                     pauseOnHover: true,
                     progressBar: true,
-                    animateInside: true,
                     transitionIn: 'fadeInLeft',
                     transitionOut: 'fadeOutRight'
                 });

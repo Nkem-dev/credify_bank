@@ -105,11 +105,12 @@
                 </a>
             </div>
 
-            <!-- Footer -->
+           
+        </div>
+         <!-- Footer -->
             <p class="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
                 © {{ date('Y') }} Credify Bank. All rights reserved.
             </p>
-        </div>
     </div>
 
     <!-- Scripts -->

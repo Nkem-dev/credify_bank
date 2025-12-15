@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LoanApproved;
 use App\Models\Loan;
 use App\Models\Transfer;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class LoanController extends Controller
 {
@@ -198,6 +200,9 @@ class LoanController extends Controller
                     'admin_notes' => $request->notes,
                 ]),
             ]);
+
+            // Send loan approval email
+            Mail::to($user->email)->send(new LoanApproved($loan));
 
             DB::commit(); //commit to database
 

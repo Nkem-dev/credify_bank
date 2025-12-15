@@ -118,7 +118,7 @@
                 </div>
 
                 <!-- Remember Me Checkbox -->
-<div class="mb-6 flex items-center">
+{{-- <div class="mb-6 flex items-center">
     <input
         type="checkbox"
         id="remember"
@@ -128,7 +128,20 @@
     <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
         Remember me
     </label>
-</div>
+</div> --}}
+<div class="mb-6 flex items-center">
+        <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            {{ old('remember') ? 'checked' : '' }}
+            class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-gray-700 cursor-pointer"
+        />
+        <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+            Remember me
+        </label>
+    </div>
+
 
                 <!-- Submit Button -->
                 <button
